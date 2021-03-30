@@ -7,5 +7,7 @@ for f in *[:alnum:]#.tif; do
 done
 
 tiffcp *[:alnum:]#.tif tmp.tif
-tiff2pdf tmp.tif > $1
-rm tmp.tif
+tiff2pdf tmp.tif > tmp.pdf
+# https://blog.omgmog.net/post/compressing-pdf-from-your-mac-or-linux-terminal-with-ghostscript/
+gs -sDEVICE=pdfwrite -dNOPAUSE -dQUIET -dBATCH -dPDFSETTINGS=/screen -dCompatibilityLevel=1.4 -sOutputFile="$1" tmp.pdf
+rm tmp.tif tmp.pdf
