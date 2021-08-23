@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: R code chunk (Rmd)
+# key: `
+# --
+\`\`\`{r}
+$0
+\`\`\`

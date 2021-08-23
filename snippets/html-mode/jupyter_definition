@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Jupyter Notebook definition (ipynb)
+# key: dd
+# --
+<dt><b><a href="$1">$2</a></b></dt>
+<dd>$0</dd>

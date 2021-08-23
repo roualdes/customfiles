@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Span colored red for answers
+# key: span
+# --
+<span style="color:red">$0</span>
