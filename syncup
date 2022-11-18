@@ -1,0 +1,15 @@
+#! /bin/zsh -
+
+SRC="$1"
+DEST=${SRC/~\/dos/}
+
+rclone --exclude "node_modules/**" \
+       --exclude .DS_Store \
+       --exclude .p.kdbx.lock \
+       --exclude .Rhistory \
+       --exclude .juliahistory \
+       --delete-excluded \
+       # --dry-run \
+       # -v \
+       # --log-file=/Users/ez/Desktop/rclonelog.txt \
+       sync "$1" dos:roualdes"$DEST"
