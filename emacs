@@ -1,7 +1,5 @@
-(let ((default-directory "/Users/ez/.emacs.d/"))
+(let ((default-directory "/Users/edward/.emacs.d/"))
   (normal-top-level-add-subdirs-to-load-path))
-
-(setq debug-on-error t)
 
 ;; package.el
 (require 'package)
@@ -15,7 +13,7 @@
 (when (not package-archive-contents)
   (package-refresh-contents))
 
-(require 'jinja2-mode)
+;; (require 'jinja2-mode)
 
 ;; ido
 (require 'ido)
@@ -24,7 +22,6 @@
 ;; window-numbering
 (require 'window-numbering)
 (window-numbering-mode t)
-
 
 ;;; column-marker
 ;; (unless (package-installed-p 'column-marker)
@@ -112,6 +109,8 @@
 (require 'python)
 (require 'cython-mode)
 
+
+(python-x-setup)
 (autoload 'python-x "python-x" "Python-x-mode" t)
 (add-hook 'python-mode-hook
 	  '(lambda ()
@@ -136,8 +135,8 @@
   (package-install 'virtualenvwrapper))
 (require 'virtualenvwrapper)
 (venv-initialize-interactive-shells) ;; if you want interactive shell support
-(setq venv-location '("/Users/ez/venvs/py3/"
-                      "/Users/ez/venvs/py2/"))
+(setq venv-location '("/Users/edward/venvs/py3/"
+                      "/Users/edward/venvs/py2/"))
 
 ; emacs
 (setq inhibit-startup-message   t)   ; Don't want any startup message
@@ -152,9 +151,9 @@
 (column-number-mode 1)	       ; column numbers
 (setq-default indent-tabs-mode nil)	; use only spaces and no tabs
 (setq delete-by-moving-to-trash t)
-;; (set-frame-font "Inconsolata-14")
-(set-face-attribute 'default nil :font "SF Mono-12")
+(set-frame-font "JuliaMono-12")
 ;; (set-frame-font "SF Mono-12")
+;; (set-frame-font "Menlo-12")
 
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
 (add-hook 'emacs-lisp-mode-hook
@@ -174,6 +173,7 @@
             (emacs-lisp-docstring-fill-column t))
         (fill-paragraph nil region)))
 (define-key global-map "\M-Q" 'unfill-paragraph)
+
 
 
 ;; uniquify
@@ -234,13 +234,13 @@
 ;; (setq-default TeX-master nil)
 
 ;; ;; latex hook
-(load "auctex.el" nil t t)
+;; (load "auctex.el" nil t t)
 (add-hook 'LaTeX-mode-hook
 	  (lambda ()
 	    (setq outline-minor-mode t)
 	    (make-local-variable 'outline-regexp)
             (electric-pair-mode t)
-	    (TeX-fold-mode 1)
+	    ;; (TeX-fold-mode 1)
 	    (set (make-variable-buffer-local 'TeX-electric-math)
 		 (cons "$" "$"))
             (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
@@ -260,7 +260,7 @@
 (define-key cm-map "q" 'hide-sublevels)    ; Hide everything but the top-level headings
 (define-key cm-map "t" 'hide-body)         ; Hide everything but headings (all body lines)
 (define-key cm-map "d" 'hide-subtree)      ; Hide everything in this entry and sub-entries
-(define-key cm-map "a" 'outline-show-all)          ; Show (expand) everything
+(define-key cm-map "a" 'outline-show-all)  ; Show (expand) everything
 (define-key cm-map "k" 'show-branches)     ; Show all sub-headings under this heading
 (define-key cm-map "s" 'show-subtree)      ; Show (expand) everything in this heading & below
 ;; (define-key cm-map "o" 'hide-other)        ; Hide other branches
@@ -268,9 +268,9 @@
 ;; (define-key cm-map "l" 'hide-leaves)       ; Hide body lines in this entry and sub-entries
 ;; (define-key cm-map "e" 'show-entry)        ; Show this heading's body
 ;; (define-key cm-map "i" 'show-children)     ; Show this heading's immediate child sub-headings
-;; (define-key cm-map "u" 'outline-up-heading)                ; Up
-;; (define-key cm-map "n" 'outline-next-visible-heading)      ; Next
-;; (define-key cm-map "p" 'outline-previous-visible-heading)  ; Previous
+(define-key cm-map "u" 'outline-up-heading)                ; Up
+(define-key cm-map "n" 'outline-next-visible-heading)      ; Next
+(define-key cm-map "p" 'outline-previous-visible-heading)  ; Previous
 ;; (define-key cm-map "f" 'outline-forward-same-level)        ; Forward - same level
 ;; (define-key cm-map "b" 'outline-backward-same-level)       ; Backward - same level
 (global-set-key "\M-p" cm-map)
@@ -286,7 +286,7 @@
              (hs-minor-mode)
              (electric-pair-mode t)
              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
-(require 'cmake-mode)
+;; (require 'cmake-mode)
 
 ; hs
 ;; HideShow new key binding
@@ -309,9 +309,11 @@
 ;(add-to-list 'load-path "/Users/ez/.emacs.d/ESS/lisp/")
 
 (require 'julia-mode)
-(setq inferior-R-program-name "/usr/local/bin/R")
+(setq inferior-R-program "/usr/local/bin/R")
 
-(setq inferior-julia-program-name "/Applications/Julia-1.5.app/Contents/Resources/julia/bin/julia")
+
+(setenv "LD_LIBRARY_PATH" "/usr/local/Cellar/arrayfire/3.8.0/lib")
+(setq inferior-julia-program "/Applications/Julia-1.6.app/Contents/Resources/julia/bin/julia")
 (add-hook 'ess-julia-mode-hook
 	  '(lambda ()
 	     (outline-minor-mode)
@@ -339,7 +341,6 @@
              (setq ess-r-package-auto-set-evaluation-env nil)))
 (setq ess-eval-visibly-p nil) ;otherwise C-c C-r (eval region) takes forever
 (setq ess-ask-for-ess-directory nil) ;otherwise prompted each time you start R
-(ess-toggle-underscore nil)             ; leave underscore alone
 
 
 
@@ -439,13 +440,13 @@
 (require 'pug-mode)
 
 
-(require 'nodejs-repl)
-(add-hook 'js-mode-hook
-          (lambda ()
-            (define-key js-mode-map (kbd "C-c C-n") 'nodejs-repl-send-last-sexp)
-            (define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
-            (define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
-            (define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl)))
+;; (require 'nodejs-repl)
+;; (add-hook 'js-mode-hook
+;;           (lambda ()
+;;             (define-key js-mode-map (kbd "C-c C-n") 'nodejs-repl-send-last-sexp)
+;;             (define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
+;;             (define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
+;;             (define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl)))
 
 ;json
 (unless (package-installed-p 'json-mode)
@@ -467,8 +468,8 @@
 
 
 ;;; polymode
-;; (unless (package-installed-p 'polymode)
-;;   (package-install 'polymode))
+(unless (package-installed-p 'poly-R)
+  (package-install 'poly-R))
 (require 'poly-R)
 (require 'poly-markdown)
 (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
@@ -487,6 +488,13 @@
 (add-hook 'js-mode-hook
           '(lambda ()
              (electric-pair-mode t)))
+;; (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
+
+(require 'typescript-mode)
+
+(add-hook 'typescript-mode-hook
+          '(lambda ()
+             (electric-pair-mode t)))
 
 ;; electric pair mode -- ensure single quote
 (defvar web-electric-pairs-single-quote '((?\' . ?\') ) "Electric pairs for web-mode, single quote.")
@@ -496,9 +504,10 @@
   (setq-local electric-pair-pairs (append electric-pair-pairs web-electric-pairs-angle-bracket)))
 
 ;; web-mode
+(unless (package-installed-p 'web-mode)
+  (package-install 'web-mode))
 (require 'web-mode)
-(add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
+
 (setq web-mode-enable-auto-closing t)
 (add-hook 'web-mode-hook
           (lambda ()
@@ -508,6 +517,9 @@
             (if (equal web-mode-content-type "javascript")
                 (web-mode-set-content-type "jsx")
               (message "now set to: %s" web-mode-content-type))))
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 
 ; compile
 (global-set-key [f9] 'compile)
@@ -561,15 +573,11 @@ directory."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (polymode virtualenvwrapper stan-snippets python-x pyenv-mode pug-mode pkg-info json-mode go-mode el-get ein editorconfig diminish cython-mode bind-key auctex))))
+    (js2-mode rjsx-mode polymode virtualenvwrapper stan-snippets python-x pyenv-mode pug-mode pkg-info json-mode go-mode el-get ein editorconfig diminish cython-mode bind-key auctex)))
+ '(safe-local-variable-values (quote ((TeX-master . t) (TeX-master . "main")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-
-;; lua
-(autoload 'lua-mode "lua-mode" "Lua editing mode." t)
-(add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
-(add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
