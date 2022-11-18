@@ -9,7 +9,4 @@ rclone --exclude "node_modules/**" \
        --exclude .Rhistory \
        --exclude .juliahistory \
        --delete-excluded \
-       # --dry-run \
-       # -v \
-       # --log-file=/Users/ez/Desktop/rclonelog.txt \
        sync "$1" dos:roualdes"$DEST"

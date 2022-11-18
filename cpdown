@@ -1,6 +1,3 @@
 #! /bin/zsh -
 
-rclone -v \
-       # --dry-run \
-       # --log-file=/Users/ez/Desktop/rclonelog.txt \
-       copy dos:roualdes/"$1" ~/dos/"$1"
+rclone copy dos:roualdes/"$1" ~/dos/"$1"
