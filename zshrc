@@ -13,3 +13,5 @@ PROMPT='%~ $(git_branch)%% '
 
 export PATH="/Applications/Julia-1.6.app/Contents/Resources/julia/bin:$PATH"
 # alias julia='julia -t2 -J/Users/edward/customfiles/PlotsSysimage.so'
+
+alias rest='pmset sleepnow'
