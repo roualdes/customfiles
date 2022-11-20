@@ -1,3 +1,0 @@
-#! /bin/zsh -
-
-rclone copy dos:roualdes/"$1" ~/dos/"$1"
