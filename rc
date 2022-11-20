@@ -80,15 +80,16 @@
     (if (:test opts)
       ["--verbose"
        "--dry-run"
-       (str "--log-file=" logfile)])))
+       (str "--log-file=" logfile)]
+      [])))
 
 (def sync-flags
-  ["--delete-excluded"
-   "--exclude=node_modules/**"
+  ["--exclude=node_modules/**"
    "--exclude=.DS_Store"
    "--exclude=.p.kdbx.lock"
    "--exclude=.Rhistory"
-   "--exclude=.juliahistory"])
+   "--exclude=.juliahistory"
+   "--delete-excluded"])
 
 (defn sync [path opts]
   (pprint
@@ -96,11 +97,11 @@
           (flatten
            [;"echo" ;; for debugging
             "rclone"
+            sync-flags
+            (test-flags opts)
             "sync"
             (local path)
-            (remote path)
-            (test-flags opts)
-            sync-flags]))))
+            (remote path)]))))
 
 (defn copy [path opts]
   (pprint
@@ -108,10 +109,10 @@
           (flatten
            [;"echo" ;; for debugging
             "rclone"
+            (test-flags opts)
             "copy"
             (remote path)
-            (local path)
-            (test-flags opts)]))))
+            (local path)]))))
 
 (defn run [args]
   (let [{:keys [path action options exit-message ok?]} (validate-args args)]
