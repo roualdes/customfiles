@@ -109,8 +109,10 @@
   (System/exit status))
 
 (defn add-action [valargs]
-  (assoc valargs :command
-         (conj (:command valargs) (:action valargs))))
+  (let [action (:action valargs)
+        rc-cmd ((keyword action) {:push "sync" :pull "copy"})]
+    (assoc valargs :command
+           (conj (:command valargs) rc-cmd))))
 
 (defn test-flag [valargs]
   (if (:test (:options valargs))
@@ -171,7 +173,7 @@
     (case action
       "push" (push-command valargs)
       "pull" (pull-command valargs))))
-      
+
 
 (defn run-command [valargs]
   (let [cmd (:command (form-command valargs))]
