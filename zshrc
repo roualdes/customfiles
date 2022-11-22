@@ -11,7 +11,8 @@ function git_branch() {
 setopt prompt_subst             # allow command substitution inside the prompt
 PROMPT='%~ $(git_branch)%% '
 
-export PATH="/Applications/Julia-1.6.app/Contents/Resources/julia/bin:$PATH"
+export JULIA_NUM_THREADS=4
+alias julia='/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia'
 # alias julia='julia -t2 -J/Users/edward/customfiles/PlotsSysimage.so'
 
 alias rest='pmset sleepnow'
