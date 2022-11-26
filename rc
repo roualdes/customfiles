@@ -98,8 +98,9 @@
             path path
             home (System/getProperty "user.home")]
         (and (= 2 (count arguments))
-             (and (#{"push" "pull"} action)
-                  (.exists (io/as-file (str home "/dos/" path))))))
+             (#{"push" "pull"} action)))
+      ;; TODO? add check exixts? local or remote
+      ;; (.exists (io/as-file (str home "/dos/" path)))
       {:action action :path path :command ["rclone"] :options options}
       :else ; failed  custom validation => exit with usage summary
       {:exit-message (usage summary)})))
