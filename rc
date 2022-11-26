@@ -9,6 +9,7 @@
 (def cli-options
   [["-n" "--dry-run" "Do a dry run before living dangerously"]
    ["-t" "--test" "Test script by echoing the command that would otherwise be run"]
+   ["-d" "--delete-destination" "Delete files on destinaton, if they don't exist on source"]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
@@ -55,7 +56,7 @@
          (if (folder? file)
            (not-dot path)
            (if (= action "push")
-             path
+             (not-dot path)
              (if (string/includes? path "/")
                (str (string/join "/" (butlast (string/split path #"/"))) "/")))))))
 
@@ -72,7 +73,7 @@
          (if (folder? file)
            (not-dot path)
            (if (= action "pull")
-             path
+             (not-dot path)
              (if (string/includes? path "/")
                (str (string/join "/" (butlast (string/split path #"/"))) "/")))))))
 
@@ -98,7 +99,7 @@
             path path
             home (System/getProperty "user.home")]
         (and (= 2 (count arguments))
-             (#{"push" "pull"} action)))
+              (#{"push" "pull"} action)))
       ;; TODO? add check exixts? local or remote
       ;; (.exists (io/as-file (str home "/dos/" path)))
       {:action action :path path :command ["rclone"] :options options}
@@ -111,9 +112,13 @@
 
 (defn add-action [valargs]
   (let [action (:action valargs)
-        rc-cmd ((keyword action) {:push "sync" :pull "copy"})]
-    (assoc valargs :command
-           (conj (:command valargs) rc-cmd))))
+        rc-cmd ((keyword action) {:push "sync" :pull "copy"})
+        dd (get-in valargs [:options :delete-destination])]
+    (if dd
+      (assoc valargs :command
+             (conj (:command valargs) "sync"))
+      (assoc valargs :command
+             (conj (:command valargs) rc-cmd)))))
 
 (defn test-flag [valargs]
   (if (:test (:options valargs))
@@ -134,13 +139,13 @@
 ;; TODO seperate options
 ;; if verbose, print command that was called as well
 (defn dry-run-flags [valargs]
-  (if (-> valargs :options :dry-run)
-    (let [home (System/Property "user.home")
+  (if (get-in valargs [:options :dry-run])
+    (let [home (System/getProperty "user.home")
           logfile (str "--log-file=" home "/rclonelog.txt")]
       (if (.exists (io/file logfile))
         (io/delete-file logfile))
       (assoc valargs :command
-             (conj (:command valargs)  "--verbose" "--dry-run" logfile)))
+             (conj (:command valargs) "--verbose" "--dry-run" logfile)))
     valargs))
 
 (defn print-command [valargs]
