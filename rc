@@ -41,7 +41,7 @@
        (string/join \newline errors)))
 
 (defn not-dot [path]
-  (if (string/includes? path ".") "" path))
+  (if (= path ".") "" path))
 
 (defn folder? [path]
   (if (string/includes? path ".")
