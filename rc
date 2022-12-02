@@ -112,13 +112,11 @@
 
 (defn add-action [valargs]
   (let [action (:action valargs)
-        rc-cmd ((keyword action) {:push "sync" :pull "copy"})
-        dd (get-in valargs [:options :delete-destination])]
-    (if dd
-      (assoc valargs :command
-             (conj (:command valargs) "sync"))
-      (assoc valargs :command
-             (conj (:command valargs) rc-cmd)))))
+        rc-cmd (if (get-in valargs [:options :delete-destination])
+                 "sync"
+                 ((keyword action) {:push "sync" :pull "copy"}))
+        (assoc valargs :command
+               (conj (:command valargs) rc-cmd)))))
 
 (defn test-flag [valargs]
   (if (:test (:options valargs))
