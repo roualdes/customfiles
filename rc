@@ -7,32 +7,27 @@
          '[clojure.pprint :refer [pprint]])
 
 (def cli-options
-  [["-n" "--dry-run" "Do a dry run before living dangerously"]
+  [["-v" "--verbose" "Print on goings"]
+   ["-n" "--dry-run" "Do a dry run before living dangerously"]
    ["-t" "--test" "Test script by echoing the command that would otherwise be run"]
    ["-d" "--delete-destination" "Delete files on destinaton, if they don't exist on source"]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
-  (->> ["Push (sync) (local -> remote) or pull (copy) (remote -> local) files or (sub-)folders"
-        "within ~/dos, which itself is referenced as . no matter what pwd says."
+  (->> ["Push (local -> remote) or pull (remote -> local) files within ~/dos/"
         ""
-        "Subfolders and file of ~/dos are referenced by path relative to ~/dos"
-        "e.g. research/mcbayes or website/update.sh"
+        "Usage: rs [options] action"
         ""
-        "Usage: rc [options] action path"
+        "The following example will dry run push"
         ""
-        "The following example will dry run pull the contents of"
-        "website from local to remote deleting from remote what does not "
-        "exist on local."
-        ""
-        "Example: rc -n push website"
+        "Example: rs -n push"
         ""
         "Options:"
         options-summary
         ""
         "Actions:"
-        "  push    Push to DigitalOcean storage (deletes files on remote)"
-        "  pull    Pull from DigitalOcean storage (never deletes files)"
+        "  push    Push to remote storage"
+        "  pull    Pull from remote storage"
         ""]
        (string/join \newline)))
 
@@ -40,69 +35,20 @@
   (str "The following errors occurred while parsing your command:\n\n"
        (string/join \newline errors)))
 
-(defn not-dot [path]
-  (if (= path ".") "" path))
-
-(defn folder? [path]
-  (if (string/includes? path ".")
-    (empty? (string/split path #"\."))
-    true))
-
-(defn local [valargs]
-  (let [{:keys [action path]} valargs
-        home (System/getProperty "user.home")
-        file (str home "/dos/" path)]
-    (str home "/dos/"
-         (if (folder? file)
-           (not-dot path)
-           (if (= action "push")
-             (not-dot path)
-             (if (string/includes? path "/")
-               (str (string/join "/" (butlast (string/split path #"/"))) "/")))))))
-
-(defn add-local [valargs]
-  (assoc valargs :command
-         (conj (:command valargs)
-               (local valargs))))
-
-(defn remote [valargs]
-  (let [{:keys [action path]} valargs
-        home (System/getProperty "user.home")
-        file (str home "/dos/" path)]
-    (str "dos:roualdes/"
-         (if (folder? file)
-           (not-dot path)
-           (if (= action "pull")
-             (not-dot path)
-             (if (string/includes? path "/")
-               (str (string/join "/" (butlast (string/split path #"/"))) "/")))))))
-
-(defn add-remote [valargs]
-  (assoc valargs :command
-         (conj (:command valargs)
-               (remote valargs))))
-
 (defn validate-args
   "Validate command line arguments. Either return a map indicating the program
   should exit (with an error message, and optional ok status), or a map
   indicating the action the program should take and the options provided."
   [args]
-  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)
-        action (first arguments)
-        path (second arguments)]
+  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     (cond
       (:help options) ; help => exit OK with usage summary
       {:exit-message (usage summary) :ok? true}
       errors ; errors => exit with description of errors
       {:exit-message (error-msg errors)}
-      (let [action action
-            path path
-            home (System/getProperty "user.home")]
-        (and (= 2 (count arguments))
-              (#{"push" "pull"} action)))
-      ;; TODO? add check exixts? local or remote
-      ;; (.exists (io/as-file (str home "/dos/" path)))
-      {:action action :path path :command ["rclone"] :options options}
+      (and (= 1 (count arguments))
+           (#{"push" "pull"} (first arguments)))
+      {:action (first arguments) :command ["rsync" "--rsh=ssh"] :options options}
       :else ; failed  custom validation => exit with usage summary
       {:exit-message (usage summary)})))
 
@@ -111,12 +57,9 @@
   (System/exit status))
 
 (defn add-action [valargs]
-  (let [action (:action valargs)
-        rc-cmd (if (get-in valargs [:options :delete-destination])
-                 "sync"
-                 ((keyword action) {:push "sync" :pull "copy"}))]
-        (assoc valargs :command
-               (conj (:command valargs) rc-cmd))))
+  (let [action (:action valargs)]
+    (assoc valargs :command
+           (conj (:command valargs) action))))
 
 (defn test-flag [valargs]
   (if (:test (:options valargs))
@@ -127,24 +70,33 @@
 (defn push-flags [valargs]
   (assoc valargs :command
          (conj (:command valargs)
-               "--exclude=node_modules/**"
-               "--exclude=.DS_Store"
-               "--exclude=.p.kdbx.lock"
-               "--exclude=.Rhistory"
-               "--exclude=.juliahistory"
-               "--delete-excluded")))
+               "--exclude=\"node_modules/\""
+               "--exclude=\".DS_Store\""
+               "--exclude=\".p.kdbx.lock\""
+               "--exclude=\".Rhistory\""
+               "--exclude=\".juliahistory\""
+               "--exclude=\"*_files\"")))
 
-;; TODO seperate options
-;; if verbose, print command that was called as well
-(defn dry-run-flags [valargs]
+(defn dry-run-flag [valargs]
   (if (get-in valargs [:options :dry-run])
-    (let [home (System/getProperty "user.home")
-          logfile (str "--log-file=" home "/rclonelog.txt")]
-      (if (.exists (io/file logfile))
-        (io/delete-file logfile))
-      (assoc valargs :command
-             (conj (:command valargs) "--verbose" "--dry-run" logfile)))
+    (assoc valargs :command
+           (conj (:command valargs) "--dry-run"))
+  valargs))
+
+(defn verbose-flag [valargs]
+  (if (get-in valargs [:options :verbose])
+    (assoc valargs :command
+           (conj (:command valargs) "--verbose"))
     valargs))
+
+(defn add-local [valargs]
+  (let [home (System/getProperty "user.home")]
+    (assoc valargs :command
+           (conj (:command valargs) (str home "/dos/")))))
+
+(defn add-remote [valargs]
+  (assoc valargs :command
+         (conj (:command valargs) "kauai:/mnt/dos/")))
 
 (defn print-command [valargs]
   (let [cmd (:command valargs)]
@@ -158,8 +110,9 @@
 (defn push-command [valargs]
   (-> valargs
       test-flag
+      verbose-flag
+      dry-run-flag
       push-flags
-      dry-run-flags
       add-action
       add-local
       add-remote))
@@ -167,8 +120,8 @@
 (defn pull-command [valargs]
   (-> valargs
       test-flag
-      dry-run-flags
-      add-action
+      verbose-flag
+      dry-run-flag
       add-remote
       add-local))
 
@@ -177,7 +130,6 @@
     (case action
       "push" (push-command valargs)
       "pull" (pull-command valargs))))
-
 
 (defn run-command [valargs]
   (let [cmd (:command (form-command valargs))]
