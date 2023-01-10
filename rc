@@ -71,7 +71,8 @@
                "--exclude=.p.kdbx.lock"
                "--exclude=.Rhistory"
                "--exclude=.juliahistory"
-               "--exclude=*_files/")))
+               "--exclude=*_files/"
+               "--exclude=.svelte-kit")))
 
 (defn dry-run-flag [valargs]
   (if (get-in valargs [:options :dry-run])
