@@ -124,6 +124,7 @@
       test-flag
       verbose-flag
       dry-run-flag
+      delete-flag
       add-remote
       add-local))
 
