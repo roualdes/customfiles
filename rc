@@ -10,17 +10,17 @@
   [["-v" "--verbose" "Print on goings"]
    ["-n" "--dry-run" "Do a dry run before living dangerously"]
    ["-t" "--test" "Test script by echoing the command that would otherwise be run"]
-   ["-d" "--delete-excluded" "Delete excluded files on destinaton"]
+   ["-d" "--delete" "Delete extraneous files on destinaton that don't live on source"]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
   (->> ["Push (local -> remote) or pull (remote -> local) files within ~/dos/"
         ""
-        "Usage: rs [options] action"
+        "Usage: rc [options] action"
         ""
         "The following example will dry run push"
         ""
-        "Example: rs -n push"
+        "Example: rc -n push"
         ""
         "Options:"
         options-summary
@@ -85,10 +85,14 @@
            (conj (:command valargs) "--verbose"))
     valargs))
 
+(defn delete-excluded-flag [valargs]
+  (assoc valargs :command
+         (conj (:command valargs) "--delete-excluded")))
+
 (defn delete-flag [valargs]
-  (if (get-in valargs [:options :delete-excluded])
+  (if (get-in valargs [:options :delete])
     (assoc valargs :command
-           (conj (:command valargs) "--delete-excluded"))
+           (conj (:command valargs) "--delete"))
     valargs))
 
 (defn add-local [valargs]
@@ -115,6 +119,7 @@
       verbose-flag
       dry-run-flag
       push-flags
+      delete-excluded-flag
       delete-flag
       add-local
       add-remote))
