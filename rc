@@ -10,7 +10,7 @@
   [["-v" "--verbose" "Print on goings"]
    ["-n" "--dry-run" "Do a dry run before living dangerously"]
    ["-t" "--test" "Test script by echoing the command that would otherwise be run"]
-   ["-d" "--delete-destination" "Delete files on destinaton, if they don't exist on source"]
+   ["-d" "--delete-excluded" "Delete excluded files on destinaton"]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
@@ -66,12 +66,12 @@
 (defn push-flags [valargs]
   (assoc valargs :command
          (conj (:command valargs)
-               "--exclude=\"node_modules/\""
-               "--exclude=\".DS_Store\""
-               "--exclude=\".p.kdbx.lock\""
-               "--exclude=\".Rhistory\""
-               "--exclude=\".juliahistory\""
-               "--exclude=\"*_files/\"")))
+               "--exclude=node_modules/"
+               "--exclude=.DS_Store"
+               "--exclude=.p.kdbx.lock"
+               "--exclude=.Rhistory"
+               "--exclude=.juliahistory"
+               "--exclude=*_files/")))
 
 (defn dry-run-flag [valargs]
   (if (get-in valargs [:options :dry-run])
@@ -85,11 +85,10 @@
            (conj (:command valargs) "--verbose"))
     valargs))
 
-;; TODO doesnt seem to have an effect
 (defn delete-flag [valargs]
-  (if (get-in valargs [:options :verbose])
+  (if (get-in valargs [:options :delete-excluded])
     (assoc valargs :command
-           (conj (:command valargs) "--delete" "--delete-excluded"))
+           (conj (:command valargs) "--delete-excluded"))
     valargs))
 
 (defn add-local [valargs]
@@ -115,8 +114,8 @@
       test-flag
       verbose-flag
       dry-run-flag
-      delete-flag
       push-flags
+      delete-flag
       add-local
       add-remote))
 
@@ -136,7 +135,7 @@
 
 (defn run-command [valargs]
   (let [cmd (:command (form-command valargs))]
-    (println (:out (apply sh cmd)))))
+    (println (apply sh cmd))))
 
 (defn run [args]
   (let [valargs (validate-args args)
