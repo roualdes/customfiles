@@ -73,7 +73,8 @@
                "--exclude=.juliahistory"
                "--exclude=*_files/"
                "--exclude=.svelte-kit"
-               "--exclude=*.so")))
+               "--exclude=*.so"
+               "--exclude=*.hpp")))
 
 (defn dry-run-flag [valargs]
   (if (get-in valargs [:options :dry-run])
