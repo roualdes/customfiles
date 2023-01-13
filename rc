@@ -8,7 +8,7 @@
 
 (def cli-options
   [["-v" "--verbose" "Print on goings"]
-   ["-n" "--dry-run" "Do a dry run before living dangerously"]
+   ["-n" "--dry-run" "Do a dry run before living dangerously; turns on verbose automatically"]
    ["-t" "--test" "Test script by echoing the command that would otherwise be run"]
    ["-d" "--delete" "Delete extraneous files on destinaton that don't live on source"]
    ["-h" "--help"]])
@@ -72,12 +72,13 @@
                "--exclude=.Rhistory"
                "--exclude=.juliahistory"
                "--exclude=*_files/"
-               "--exclude=.svelte-kit")))
+               "--exclude=.svelte-kit"
+               "--exclude=*.so")))
 
 (defn dry-run-flag [valargs]
   (if (get-in valargs [:options :dry-run])
     (assoc valargs :command
-           (conj (:command valargs) "--dry-run"))
+           (conj (:command valargs) "--dry-run" "--verbose"))
   valargs))
 
 (defn verbose-flag [valargs]
