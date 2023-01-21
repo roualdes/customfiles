@@ -74,7 +74,10 @@
                "--exclude=*_files/"
                "--exclude=.svelte-kit"
                "--exclude=*.so"
-               "--exclude=*.hpp")))
+               "--exclude=*.hpp"
+               "--exclude=.jupyter_cache/"
+               "--exclude=__pycache__/"
+               "--exclude=.ipynb_checkpoints/")))
 
 (defn dry-run-flag [valargs]
   (if (get-in valargs [:options :dry-run])
