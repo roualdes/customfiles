@@ -77,7 +77,8 @@
                "--exclude=*.hpp"
                "--exclude=.jupyter_cache/"
                "--exclude=__pycache__/"
-               "--exclude=.ipynb_checkpoints/")))
+               "--exclude=.ipynb_checkpoints/"
+               "--exclude=website/data/")))
 
 (defn dry-run-flag [valargs]
   (if (get-in valargs [:options :dry-run])
