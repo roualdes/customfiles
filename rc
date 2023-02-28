@@ -156,6 +156,8 @@
         {:keys [exit-message ok? action]} valargs]
     (if exit-message
       (exit (if ok? 0 1) exit-message)
-      (run-command valargs))))
+      (do
+        (run-command valargs)
+        (println (.toString (java.util.Date.)))))))
 
 (run *command-line-args*)
