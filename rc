@@ -63,7 +63,7 @@
            (vec (cons "echo" (:command valargs))))
     valargs))
 
-(defn push-flags [valargs]
+(defn push-pull-flags [valargs]
   (assoc valargs :command
          (conj (:command valargs)
                "--exclude=node_modules/"
@@ -126,7 +126,7 @@
       test-flag
       verbose-flag
       dry-run-flag
-      push-flags
+      push-pull-flags
       delete-excluded-flag
       delete-flag
       add-local
@@ -137,6 +137,7 @@
       test-flag
       verbose-flag
       dry-run-flag
+      push-pull-flags
       delete-flag
       add-remote
       add-local))

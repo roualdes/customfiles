@@ -3,7 +3,7 @@
 import sys
 import re
 
-assert len(sys.argv) == 2, "Must have exactly one argument."
+assert len(sys.argv) == 2, "Must have exactly two arguments."
 
 filename = sys.argv[1]
 
