@@ -1,54 +1,62 @@
-(let ((default-directory "/Users/edward/.emacs.d/"))
+(let ((default-directory "/Users/honu/.emacs.d/"))
   (normal-top-level-add-subdirs-to-load-path))
 
 ;; package.el
-(require 'package)
-(package-initialize)
-(setq package-archives
-      '(("gnu" . "https://elpa.gnu.org/packages/")
-        ;("marmalade" . "https://marmalade-repo.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
-        ("elpy" . "https://jorgenschaefer.github.io/packages/")))
-(package-initialize)
-(when (not package-archive-contents)
-  (package-refresh-contents))
+;; (require 'package)
+;; (package-initialize)
+;; (setq package-archives
+;;       '(("gnu" . "https://elpa.gnu.org/packages/")
+;;         ;("marmalade" . "https://marmalade-repo.org/packages/")
+;;         ("melpa" . "https://melpa.org/packages/")
+;;         ("elpy" . "https://jorgenschaefer.github.io/packages/")))
+;; (package-initialize)
+;; (when (not package-archive-contents)
+;;   (package-refresh-contents))
 
-;; (require 'jinja2-mode)
+;; (unless (package-installed-p 'python-x)
+;;   (package-refresh-contents)
+;;   (package-install 'python-x))
+;; (unless (package-installed-p 'cython-mode)
+;;   (package-refresh-contents)
+;;   (package-install 'cython-mode))
+;; needs dash and s; install with package-install
+;; (unless (package-installed-p 'virtualenvwrapper)
+;;   (package-install 'virtualenvwrapper))
+;; (unless (package-installed-p 'julia-mode)
+;; (unless (package-installed-p 'web-mode)
+;;   (package-install 'web-mode))
+;;   (package-install 'julia-mode))
+;; (unless (package-installed-p 'paredit)
+;;   (package-install 'paredit))
+;; (unless (package-installed-p 'ess)
+;;   (package-install 'ess))
+;; (unless (package-installed-p 'poly-R)
+;;   (package-install 'poly-R))
+;; (mapc
+;;  (lambda (p)
+;;    (unless (package-installed-p p)
+;;      (package-install p)))
+;;  '(stan-mode stan-snippets))
+;; (unless (package-installed-p 'json-mode)
+;;   (package-install 'json-mode))
+
 
 ;; ido
-(require 'ido)
-(ido-mode t)
+;; (require 'ido)
+;; (ido-mode t)
 
 ;; window-numbering
 (require 'window-numbering)
 (window-numbering-mode t)
-
-;;; column-marker
-;; (unless (package-installed-p 'column-marker)
-;;   (package-install 'column-marker))
-;; (require 'column-marker)
 
 ;;;;;;;;;;;;;;;;;;;;;;;; line-comment-banner ;;;;;;;;;;;;;;;;;;;;;;;;;
 (autoload 'line-comment-banner "line-comment-banner" nil t)
 (global-set-key (kbd "C-;") 'line-comment-banner)
 
 ; paredit
-;; (unless (package-installed-p 'paredit)
-;;   (package-install 'paredit))
 ;; (require 'paredit)
 ;; (autoload 'enable-paredit-mode "paredit"
 ;;   "Turn on pseudo-structural editing of Lisp code." t)
-
-;; some path adjustments
-;;; for auctex
-;; (unless (package-installed-p 'auctex)
-;;   (package-refresh-contents)
-;;   (package-install 'auctex))
-;; (setenv "PATH"
-;; 	(concat "/Library/TeX/texbin:/usr/local/bin:"
-;;             (getenv "PATH")))
-;; (add-to-list 'exec-path "/usr/texbin")
-;; (add-to-list 'exec-path "/usr/local/bin")
 
 (setenv "PATH"
 	(concat "/usr/local/bin:"
@@ -99,15 +107,14 @@
 ;;     (python-shell-send-region (point-at-bol) (point-at-eol)))
 ;;   (next-line))
 
-(autoload 'folding-mode          "folding" "Folding mode" t)
-(autoload 'turn-off-folding-mode "folding" "Folding mode" t)
-(autoload 'turn-on-folding-mode  "folding" "Folding mode" t)
+;; (autoload 'folding-mode          "folding" "Folding mode" t)
+;; (autoload 'turn-off-folding-mode "folding" "Folding mode" t)
+;; (autoload 'turn-on-folding-mode  "folding" "Folding mode" t)
 
-(unless (package-installed-p 'cython-mode)
-  (package-refresh-contents)
-  (package-install 'cython-mode))
+
 (require 'python)
 (require 'cython-mode)
+
 
 
 (python-x-setup)
@@ -130,13 +137,10 @@
              (electric-pair-mode t)))
 
 ;; virtualenvwrapper
-;; needs dash and s; install with package-install
-(unless (package-installed-p 'virtualenvwrapper)
-  (package-install 'virtualenvwrapper))
 (require 'virtualenvwrapper)
 (venv-initialize-interactive-shells) ;; if you want interactive shell support
-(setq venv-location '("/Users/edward/venvs/py3/"
-                      "/Users/edward/venvs/py2/"))
+(setq venv-location '("/Users/honu/venvs/py3/"
+                      "/Users/honue/venvs/py2/"))
 
 ; emacs
 (setq inhibit-startup-message   t)   ; Don't want any startup message
@@ -151,9 +155,6 @@
 (column-number-mode 1)	       ; column numbers
 (setq-default indent-tabs-mode nil)	; use only spaces and no tabs
 (setq delete-by-moving-to-trash t)
-(set-frame-font "JuliaMono-12")
-;; (set-frame-font "SF Mono-12")
-;; (set-frame-font "Menlo-12")
 
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
 (add-hook 'emacs-lisp-mode-hook
@@ -255,25 +256,25 @@
 
 ; outline
 ;; Outline-minor-mode key map
-(define-prefix-command 'cm-map nil "outline-")
-;;; HIDE
-(define-key cm-map "q" 'hide-sublevels)    ; Hide everything but the top-level headings
-(define-key cm-map "t" 'hide-body)         ; Hide everything but headings (all body lines)
-(define-key cm-map "d" 'hide-subtree)      ; Hide everything in this entry and sub-entries
-(define-key cm-map "a" 'outline-show-all)  ; Show (expand) everything
-(define-key cm-map "k" 'show-branches)     ; Show all sub-headings under this heading
-(define-key cm-map "s" 'show-subtree)      ; Show (expand) everything in this heading & below
-;; (define-key cm-map "o" 'hide-other)        ; Hide other branches
-;; (define-key cm-map "c" 'hide-entry)        ; Hide this entry's body
-;; (define-key cm-map "l" 'hide-leaves)       ; Hide body lines in this entry and sub-entries
-;; (define-key cm-map "e" 'show-entry)        ; Show this heading's body
-;; (define-key cm-map "i" 'show-children)     ; Show this heading's immediate child sub-headings
-(define-key cm-map "u" 'outline-up-heading)                ; Up
-(define-key cm-map "n" 'outline-next-visible-heading)      ; Next
-(define-key cm-map "p" 'outline-previous-visible-heading)  ; Previous
-;; (define-key cm-map "f" 'outline-forward-same-level)        ; Forward - same level
-;; (define-key cm-map "b" 'outline-backward-same-level)       ; Backward - same level
-(global-set-key "\M-p" cm-map)
+;; (define-prefix-command 'cm-map nil "outline-")
+;; ;;; HIDE
+;; (define-key cm-map "q" 'hide-sublevels)    ; Hide everything but the top-level headings
+;; (define-key cm-map "t" 'hide-body)         ; Hide everything but headings (all body lines)
+;; (define-key cm-map "d" 'hide-subtree)      ; Hide everything in this entry and sub-entries
+;; (define-key cm-map "a" 'outline-show-all)  ; Show (expand) everything
+;; (define-key cm-map "k" 'show-branches)     ; Show all sub-headings under this heading
+;; (define-key cm-map "s" 'show-subtree)      ; Show (expand) everything in this heading & below
+;; ;; (define-key cm-map "o" 'hide-other)        ; Hide other branches
+;; ;; (define-key cm-map "c" 'hide-entry)        ; Hide this entry's body
+;; ;; (define-key cm-map "l" 'hide-leaves)       ; Hide body lines in this entry and sub-entries
+;; ;; (define-key cm-map "e" 'show-entry)        ; Show this heading's body
+;; ;; (define-key cm-map "i" 'show-children)     ; Show this heading's immediate child sub-headings
+;; (define-key cm-map "u" 'outline-up-heading)                ; Up
+;; (define-key cm-map "n" 'outline-next-visible-heading)      ; Next
+;; (define-key cm-map "p" 'outline-previous-visible-heading)  ; Previous
+;; ;; (define-key cm-map "f" 'outline-forward-same-level)        ; Forward - same level
+;; ;; (define-key cm-map "b" 'outline-backward-same-level)       ; Backward - same level
+;; (global-set-key "\M-p" cm-map)
 
 ; c++
 (add-hook 'c++-mode-hook
@@ -290,9 +291,9 @@
 
 ; hs
 ;; HideShow new key binding
-(global-set-key (kbd "C-c l") 'hs-hide-level)
-(global-set-key (kbd "C-c h") 'hs-hide-all)
-(global-set-key (kbd "C-c c") 'hs-toggle-hiding)
+;; (global-set-key (kbd "C-c l") 'hs-hide-level)
+;; (global-set-key (kbd "C-c h") 'hs-hide-all)
+;; (global-set-key (kbd "C-c c") 'hs-toggle-hiding)
 
 
 ; java
@@ -308,12 +309,13 @@
 ; ess
 ;(add-to-list 'load-path "/Users/ez/.emacs.d/ESS/lisp/")
 
+
 (require 'julia-mode)
-(setq inferior-R-program "/usr/local/bin/R")
+;; (setq inferior-R-program "/usr/local/bin/R")
 
 
-(setenv "LD_LIBRARY_PATH" "/usr/local/Cellar/arrayfire/3.8.0/lib")
-(setq inferior-julia-program "/Applications/Julia-1.6.app/Contents/Resources/julia/bin/julia")
+;; (setenv "LD_LIBRARY_PATH" "/usr/local/Cellar/arrayfire/3.8.0/lib")
+;; (setq inferior-julia-program "/Applications/Julia-1.6.app/Contents/Resources/julia/bin/julia")
 (add-hook 'ess-julia-mode-hook
 	  '(lambda ()
 	     (outline-minor-mode)
@@ -323,10 +325,7 @@
              (electric-pair-mode t)
              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 
-(setq inferior-octave-program "/usr/local/bin/octave")
 
-(unless (package-installed-p 'ess)
-  (package-install 'ess))
 (load "ess-autoloads")
 (require 'ess-site)
 (setq inferior-R-args "--no-restore-history --no-save ")
@@ -343,8 +342,6 @@
 (setq ess-ask-for-ess-directory nil) ;otherwise prompted each time you start R
 
 
-
-
 ;; (add-hook 'julia-mode-hook
 ;; 	  '(lambda ()
 ;; 	     (outline-minor-mode)
@@ -354,62 +351,19 @@
 ;;              (electric-pair-mode t)
 ;;              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 
-; rstan
-(mapc
- (lambda (p)
-   (unless (package-installed-p p)
-     (package-install p)))
- '(stan-mode stan-snippets))
-
-; org
-(setq org-startup-truncated nil)
-(require 'org-install)
 (require 'org)
 
-;; ;; Supported org languages
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (org-babel-do-load-languages
-;;     'org-babel-load-languages
-;;     '(
-;;         (shell . t)
-;;         (python . t)
-;;         (R . t)
-;;         (org . t)
-;;         (julia . t)
-;;     )
-;; )
-;; (setq org-src-preserve-indentation t)
-
-
-
-
-; mysql
-;; (setq sql-mysql-program "/usr/local/bin/mysql")
-;; (setq sql-user "edward")
-
 ; sort words
-(defun sort-words (reverse beg end)
-  "Sort words in region alphabetically, in REVERSE if negative.
-    Prefixed with negative \\[universal-argument], sorts in reverse.
+;; (defun sort-words (reverse beg end)
+;;   "Sort words in region alphabetically, in REVERSE if negative.
+;;     Prefixed with negative \\[universal-argument], sorts in reverse.
 
-    The variable `sort-fold-case' determines whether alphabetic case
-    affects the sort order.
+;;     The variable `sort-fold-case' determines whether alphabetic case
+;;     affects the sort order.
 
-    See `sort-regexp-fields'."
-  (interactive "*P\nr")
-  (sort-regexp-fields reverse "\\w+" "\\&" beg end))
-
-; golang
-;; (unless (package-installed-p 'go-mode)
-;;   (package-install 'go-mode))
-;; (require 'go-mode)
-;; (require 'go-mode-autoloads)
-;; (add-hook 'go-mode-hook
-;;           (lambda ()
-;;             (electric-pair-mode t)
-;;             ('before-save-hook 'gofmt-before-save)
-;;             (local-set-key (kbd "C-c C-r") 'go-remove-unused-imports)
-;;             (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
+;;     See `sort-regexp-fields'."
+;;   (interactive "*P\nr")
+;;   (sort-regexp-fields reverse "\\w+" "\\&" beg end))
 
 ; node.js jade
 ;; requires M-x package-install RET js2-mode RET
@@ -430,16 +384,6 @@
 ;; (add-to-list 'interpreter-mode-alist '("node" . js2-jsx-mode))
 ;; (setq js2-indent-switch-body t)
 
-;; pug
-(unless (package-installed-p 'pug-mode)
-  (package-refresh-contents)
-  (package-install 'pug-mode))
-(add-hook 'pug-mode-hook
-          (lambda ()
-            (setq tab-width 4)))
-(require 'pug-mode)
-
-
 ;; (require 'nodejs-repl)
 ;; (add-hook 'js-mode-hook
 ;;           (lambda ()
@@ -449,8 +393,7 @@
 ;;             (define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl)))
 
 ;json
-(unless (package-installed-p 'json-mode)
-  (package-install 'json-mode))
+
 (add-hook 'json-mode-hook
           (lambda ()
             (make-local-variable 'js-indent-level)
@@ -468,8 +411,7 @@
 
 
 ;;; polymode
-(unless (package-installed-p 'poly-R)
-  (package-install 'poly-R))
+
 (require 'poly-R)
 (require 'poly-markdown)
 (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
@@ -490,11 +432,10 @@
              (electric-pair-mode t)))
 ;; (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
 
-(require 'typescript-mode)
-
-(add-hook 'typescript-mode-hook
-          '(lambda ()
-             (electric-pair-mode t)))
+;; (require 'typescript-mode)
+;; (add-hook 'typescript-mode-hook
+;;           '(lambda ()
+;;              (electric-pair-mode t)))
 
 ;; electric pair mode -- ensure single quote
 (defvar web-electric-pairs-single-quote '((?\' . ?\') ) "Electric pairs for web-mode, single quote.")
@@ -504,8 +445,6 @@
   (setq-local electric-pair-pairs (append electric-pair-pairs web-electric-pairs-angle-bracket)))
 
 ;; web-mode
-(unless (package-installed-p 'web-mode)
-  (package-install 'web-mode))
 (require 'web-mode)
 
 (setq web-mode-enable-auto-closing t)
@@ -520,6 +459,7 @@
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.svelte?\\'" . web-mode))
 
 ; compile
 (global-set-key [f9] 'compile)
@@ -552,32 +492,5 @@ directory."
 (yas-reload-all)
 
 
-;; editorconfig
-(unless (package-installed-p 'editorconfig)
-  (package-refresh-contents)
-  (package-install 'editorconfig))
-
-(require 'editorconfig)
-(editorconfig-mode 1)
-
-
 ;; browse kill ring
 (require 'browse-kill-ring)
-
-;; groovy-mode
-(autoload 'groovy-mode "groovy-mode" "Major mode for editing Groovy code." t)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (js2-mode rjsx-mode polymode virtualenvwrapper stan-snippets python-x pyenv-mode pug-mode pkg-info json-mode go-mode el-get ein editorconfig diminish cython-mode bind-key auctex)))
- '(safe-local-variable-values (quote ((TeX-master . t) (TeX-master . "main")))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
