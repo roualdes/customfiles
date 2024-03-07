@@ -1,18 +1,10 @@
-# function to return current branch name while suppressing errors.
-function git_branch() {
-    branch=$(git symbolic-ref HEAD 2> /dev/null | awk 'BEGIN{FS="/"} {print $NF}')
-    if [[ $branch == "" ]]; then
-        :
-    else
-        echo '('$branch')'
-    fi
+function parse_git_branch() {
+    git branch 2> /dev/null | sed -n -e 's/^\* \(.*\)/[\1]/p'
 }
 
-setopt prompt_subst             # allow command substitution inside the prompt
-PROMPT='%~ $(git_branch)%% '
-
-export JULIA_NUM_THREADS=4
-alias julia='/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia'
-# alias julia='julia -t2 -J/Users/edward/customfiles/PlotsSysimage.so'
-
-alias rest='pmset sleepnow'
+COLOR_DEF=$'%f'
+COLOR_USR=$'%F{243}'
+COLOR_DIR=$'%F{197}'
+COLOR_GIT=$'%F{39}'
+setopt PROMPT_SUBST
+export PROMPT='${COLOR_USR}%n ${COLOR_DIR}%~ ${COLOR_GIT}$(parse_git_branch)${COLOR_DEF} $ '
