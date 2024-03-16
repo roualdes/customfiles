@@ -1,4 +1,4 @@
-(let ((default-directory "/Users/honu/.emacs.d/"))
+(let ((default-directory "/Users/edward/.emacs.d/"))
   (normal-top-level-add-subdirs-to-load-path))
 
 ;; package.el
@@ -19,15 +19,14 @@
 ;; (unless (package-installed-p 'cython-mode)
 ;;   (package-refresh-contents)
 ;;   (package-install 'cython-mode))
-;; needs dash and s; install with package-install
+
+;; ;; needs dash and s; install with package-install
 ;; (unless (package-installed-p 'virtualenvwrapper)
 ;;   (package-install 'virtualenvwrapper))
 ;; (unless (package-installed-p 'julia-mode)
 ;; (unless (package-installed-p 'web-mode)
 ;;   (package-install 'web-mode))
 ;;   (package-install 'julia-mode))
-;; (unless (package-installed-p 'paredit)
-;;   (package-install 'paredit))
 ;; (unless (package-installed-p 'ess)
 ;;   (package-install 'ess))
 ;; (unless (package-installed-p 'poly-R)
@@ -139,8 +138,8 @@
 ;; virtualenvwrapper
 (require 'virtualenvwrapper)
 (venv-initialize-interactive-shells) ;; if you want interactive shell support
-(setq venv-location '("/Users/honu/venvs/py3/"
-                      "/Users/honue/venvs/py2/"))
+(setq venv-location '("/Users/edward/venvs/py3/"
+                      "/Users/edward/venvs/py2/"))
 
 ; emacs
 (setq inhibit-startup-message   t)   ; Don't want any startup message
