@@ -1,61 +1,36 @@
-(let ((default-directory "/Users/edward/.emacs.d/"))
-  (normal-top-level-add-subdirs-to-load-path))
+(eval-when-compile (require 'use-package))
 
-;; package.el
-;; (require 'package)
-;; (package-initialize)
-;; (setq package-archives
-;;       '(("gnu" . "https://elpa.gnu.org/packages/")
-;;         ;("marmalade" . "https://marmalade-repo.org/packages/")
-;;         ("melpa" . "https://melpa.org/packages/")
-;;         ("elpy" . "https://jorgenschaefer.github.io/packages/")))
-;; (package-initialize)
-;; (when (not package-archive-contents)
-;;   (package-refresh-contents))
+;; (let ((default-directory "/Users/edward/.emacs.d/"))
+;;   (normal-top-level-add-subdirs-to-load-path))
 
-;; (unless (package-installed-p 'python-x)
-;;   (package-refresh-contents)
-;;   (package-install 'python-x))
-;; (unless (package-installed-p 'cython-mode)
-;;   (package-refresh-contents)
-;;   (package-install 'cython-mode))
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-;; ;; needs dash and s; install with package-install
-;; (unless (package-installed-p 'virtualenvwrapper)
-;;   (package-install 'virtualenvwrapper))
-;; (unless (package-installed-p 'julia-mode)
-;; (unless (package-installed-p 'web-mode)
-;;   (package-install 'web-mode))
-;;   (package-install 'julia-mode))
-;; (unless (package-installed-p 'ess)
-;;   (package-install 'ess))
-;; (unless (package-installed-p 'poly-R)
-;;   (package-install 'poly-R))
-;; (mapc
-;;  (lambda (p)
-;;    (unless (package-installed-p p)
-;;      (package-install p)))
-;;  '(stan-mode stan-snippets))
-;; (unless (package-installed-p 'json-mode)
-;;   (package-install 'json-mode))
+(straight-use-package 'use-package)
 
+(use-package window-numbering
+  :demand t
+  :straight (window-numbering :type git :host github :repo "nschum/window-numbering.el")
+  :config (window-numbering-mode t))
 
-;; ido
-;; (require 'ido)
-;; (ido-mode t)
+(use-package line-comment-banner
+  :straight (line-comment-banner :type git :host github :repo "emacsattic/line-comment-banner")
+  :config
+  (global-set-key (kbd "C-;") 'line-comment-banner))
 
-;; window-numbering
-(require 'window-numbering)
-(window-numbering-mode t)
-
-;;;;;;;;;;;;;;;;;;;;;;;; line-comment-banner ;;;;;;;;;;;;;;;;;;;;;;;;;
-(autoload 'line-comment-banner "line-comment-banner" nil t)
-(global-set-key (kbd "C-;") 'line-comment-banner)
-
-; paredit
-;; (require 'paredit)
-;; (autoload 'enable-paredit-mode "paredit"
-;;   "Turn on pseudo-structural editing of Lisp code." t)
 
 (setenv "PATH"
 	(concat "/usr/local/bin:"
@@ -64,96 +39,86 @@
 	(concat "/Library/TeX/texbin:"
                 (getenv "PATH")))
 
-;; ; clojure
-;; (unless (package-installed-p 'cider)
-;;   (package-install 'cider))
-;; (require 'cider)
-;; (setq cider-repl-use-clojure-font-lock t)
-;; (setq nrepl-hide-special-buffers t)
-;; (setq cider-popup-stacktraces nil)
-;; (add-hook 'cider-mode-hook
-;; 	  '(lambda ()
-;;              (cider-turn-on-eldoc-mode)
-;; 	     (outline-minor-mode)
-;;              (paredit-mode t)
-;; 	     (make-local-variable 'outline-regexp)
-;; 	     (setq outline-regexp "[;\f]+")))
 
-;; (add-hook 'clojure-mode-hook 'paredit-mode)
-;; (add-hook 'nrepl-connected-hook 'paredit-mode)
+(use-package cython-mode
+  :straight t)
 
+(use-package python
+  :straight t
+  :init
+  (add-hook 'python-mode-hook #'electric-pair-mode))
 
-; python
-;; in case want ipython interpreter
-;; (setq
-;;  python-shell-interpreter "ipython"
-;;  python-shell-interpreter-args "--colors=Linux --profile=default --simple-prompt"
-;;  python-shell-prompt-regexp "In \\[[0-9]+\\]: "
-;;  python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
-;;  python-shell-completion-setup-code
-;;  "from IPython.core.completerlib import module_completion"
-;;  python-shell-completion-module-string-code
-;;  "';'.join(module_completion('''%s'''))\n"
-;;  python-shell-completion-string-code
-;;  "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
-
-
-;; (defun python-shell-send-region-or-line ()
-;;   "Call `python-shell-send-region' with selected region or current line (if none selected)."
-;;   (interactive)
-;;   (if (and transient-mark-mode mark-active)
-;;       (python-shell-send-region (point) (mark))
-;;     (python-shell-send-region (point-at-bol) (point-at-eol)))
-;;   (next-line))
-
-;; (autoload 'folding-mode          "folding" "Folding mode" t)
-;; (autoload 'turn-off-folding-mode "folding" "Folding mode" t)
-;; (autoload 'turn-on-folding-mode  "folding" "Folding mode" t)
-
-
-(require 'python)
-(require 'cython-mode)
-
-
+(use-package python-x
+  :straight t)
 
 (python-x-setup)
 (autoload 'python-x "python-x" "Python-x-mode" t)
-(add-hook 'python-mode-hook
-	  '(lambda ()
-	     (make-local-variable 'outline-regexp)
-	     (python-x-setup)
-	     (setq outline-regexp "[#\f]+")
-             (electric-pair-mode t)
-             (local-set-key "\C-c\C-z" 'run-python)
-	     (define-key python-mode-map (kbd "C-c C-p") 'python-shell-send-paragraph-and-step)
-	     (define-key python-mode-map (kbd "C-c M-p") 'python-shell-send-paragraph)
-             ;; (local-set-key "\C-c\C-p" 'python-shell-send-paragraph-and-step)
-             ;; (local-set-key "\C-c\M-p" 'python-shell-send-paragraph)
-             (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 
-(add-hook 'inferior-python-mode-hook
-          '(lambda ()
-             (electric-pair-mode t)))
+(use-package counsel
+  :straight t
+  :bind (
+         ("C-x C-b" . ivy-switch-buffer)
+         ("C-x b" . ivy-switch-buffer)
+         ("M-r" . counsel-ag)
+         ("C-x C-d" . counsel-dired)
+         ("C-x d" . counsel-dired)
+         ("C-s" . swiper-isearch)
+         )
+  :diminish
+  :config
+  (global-set-key [remap org-set-tags-command] #'counsel-org-tag))
 
-;; virtualenvwrapper
-(require 'virtualenvwrapper)
-(venv-initialize-interactive-shells) ;; if you want interactive shell support
-(setq venv-location '("/Users/edward/venvs/py3/"
-                      "/Users/edward/venvs/py2/"))
+
+(use-package ivy
+  :straight t
+  :demand t
+  :diminish ivy-mode
+  :config
+  (ivy-mode 1)
+  (counsel-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-use-selectable-prompt t)
+  (setq ivy-re-builders-alist '(
+                                (t . ivy--regex-ignore-order)
+                                ))
+  (setq ivy-height 10)
+  (setq counsel-find-file-at-point t)
+  (setq ivy-count-format "(%d/%d) "))
+
+
+(use-package swiper
+  :straight t
+  :bind(("M-C-s" . swiper)))
+
+(use-package ivy-hydra
+  :straight t)
+
+(use-package virtualenvwrapper
+  :straight t
+  :config
+  (venv-initialize-interactive-shells)
+  (setq venv-location '("/Users/edward/venvs/py3/"
+                        "/Users/edward/venvs/py2/")))
+
+
 
 ; emacs
 (setq inhibit-startup-message   t)   ; Don't want any startup message
-(require 'icomplete)
 (blink-cursor-mode 0)
 (setq make-backup-files         nil) ; Don't want any backup files
 (setq auto-save-list-file-name  nil) ; Don't want any .saves files
 (setq auto-save-default         nil) ; Don't want any auto saving
-(menu-bar-mode 1)		     ; get rid of menu-bar
+(setq create-lockfiles          nil) ; Don't want any lockfiles
+(menu-bar-mode 0)		     ; get rid of menu-bar
 (tool-bar-mode 0)	       ; get rid of tool-bar
 (show-paren-mode 1)	       ; enable highlighting of matched parens
 (column-number-mode 1)	       ; column numbers
 (setq-default indent-tabs-mode nil)	; use only spaces and no tabs
 (setq delete-by-moving-to-trash t)
+;; (set-frame-font "Inconsolata 16" nil t)
+;; (set-frame-font "Monaco 15" nil t)
+;; (set-frame-font "SF Mono 15" nil t)
+(set-frame-font "Fira Mono 15" nil t)
 
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
 (add-hook 'emacs-lisp-mode-hook
@@ -177,10 +142,10 @@
 
 
 ;; uniquify
-(require 'uniquify)
-(setq
- uniquify-buffer-name-style
- 'post-forward uniquify-separator ":")
+(use-package uniquify
+  :init
+  (setq uniquify-buffer-name-style
+        'post-forward uniquify-separator ":"))
 
 ; UTF-8 enconding
 (set-terminal-coding-system 'utf-8)
@@ -210,15 +175,6 @@
     (insert (format-time-string format))))
 (global-set-key (kbd "C-c d") 'insert-date)
 
-; narrowing
-;; (put 'narrow-to-region 'disabled nil)
-
-; WindMove
-;; (global-set-key (kbd "C-c <left>")  'windmove-left)
-;; (global-set-key (kbd "C-c <right>") 'windmove-right)
-;; (global-set-key (kbd "C-c <up>")    'windmove-up)
-;; (global-set-key (kbd "C-c <down>")  'windmove-down)
-
 ; text mode
 (add-hook 'text-mode-hook
 	  '(lambda ()
@@ -226,12 +182,6 @@
 	     (make-local-variable 'outline-regexp)
          (electric-pair-mode t)))
 
-
-; latex
-;; RefTeX work properly
-;; (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-;; (setq reftex-plug-into-AUCTeX t)
-;; (setq-default TeX-master nil)
 
 ;; ;; latex hook
 ;; (load "auctex.el" nil t t)
@@ -248,33 +198,6 @@
 ;; (setq-default TeX-master nil)
 (setq LaTeX-math-mode t)
 
-;; ;; pdf mode
-;; (setq TeX-PDF-mode t)
-;; (setq TeX-view-program-list '(("Preview" "open %o")))
-;; (setq TeX-view-program-selection '((output-pdf "Preview")))
-
-; outline
-;; Outline-minor-mode key map
-;; (define-prefix-command 'cm-map nil "outline-")
-;; ;;; HIDE
-;; (define-key cm-map "q" 'hide-sublevels)    ; Hide everything but the top-level headings
-;; (define-key cm-map "t" 'hide-body)         ; Hide everything but headings (all body lines)
-;; (define-key cm-map "d" 'hide-subtree)      ; Hide everything in this entry and sub-entries
-;; (define-key cm-map "a" 'outline-show-all)  ; Show (expand) everything
-;; (define-key cm-map "k" 'show-branches)     ; Show all sub-headings under this heading
-;; (define-key cm-map "s" 'show-subtree)      ; Show (expand) everything in this heading & below
-;; ;; (define-key cm-map "o" 'hide-other)        ; Hide other branches
-;; ;; (define-key cm-map "c" 'hide-entry)        ; Hide this entry's body
-;; ;; (define-key cm-map "l" 'hide-leaves)       ; Hide body lines in this entry and sub-entries
-;; ;; (define-key cm-map "e" 'show-entry)        ; Show this heading's body
-;; ;; (define-key cm-map "i" 'show-children)     ; Show this heading's immediate child sub-headings
-;; (define-key cm-map "u" 'outline-up-heading)                ; Up
-;; (define-key cm-map "n" 'outline-next-visible-heading)      ; Next
-;; (define-key cm-map "p" 'outline-previous-visible-heading)  ; Previous
-;; ;; (define-key cm-map "f" 'outline-forward-same-level)        ; Forward - same level
-;; ;; (define-key cm-map "b" 'outline-backward-same-level)       ; Backward - same level
-;; (global-set-key "\M-p" cm-map)
-
 ; c++
 (add-hook 'c++-mode-hook
           '(lambda ()
@@ -288,20 +211,6 @@
              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 ;; (require 'cmake-mode)
 
-; hs
-;; HideShow new key binding
-;; (global-set-key (kbd "C-c l") 'hs-hide-level)
-;; (global-set-key (kbd "C-c h") 'hs-hide-all)
-;; (global-set-key (kbd "C-c c") 'hs-toggle-hiding)
-
-
-; java
-;; (add-hook 'java-mode-hook
-;;           '(lambda ()
-;;              (hs-minor-mode)
-;;              (electric-pair-mode t)))
-
-
 ; color-theme
 (load-theme 'wombat t)
 
@@ -309,8 +218,12 @@
 ;(add-to-list 'load-path "/Users/ez/.emacs.d/ESS/lisp/")
 
 
-(require 'julia-mode)
+(use-package julia-mode
+  :straight t
+  :config
+  (setq inferior-julia-program-name "/Users/edward/.juliaup/bin/julia"))
 ;; (setq inferior-R-program "/usr/local/bin/R")
+
 
 
 ;; (setenv "LD_LIBRARY_PATH" "/usr/local/Cellar/arrayfire/3.8.0/lib")
@@ -325,110 +238,69 @@
              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 
 
-(load "ess-autoloads")
-(require 'ess-site)
-(setq inferior-R-args "--no-restore-history --no-save ")
-(add-hook 'ess-mode-hook
-	  '(lambda ()
-	     (outline-minor-mode)
-             (hs-minor-mode)
-	     (make-local-variable 'outline-regexp)
-	     (setq outline-regexp "[#\f]+")
-             (electric-pair-mode t)
-             (add-to-list 'write-file-functions 'delete-trailing-whitespace)
-             (setq ess-r-package-auto-set-evaluation-env nil)))
-(setq ess-eval-visibly-p nil) ;otherwise C-c C-r (eval region) takes forever
-(setq ess-ask-for-ess-directory nil) ;otherwise prompted each time you start R
+(use-package ess
+  :straight (ess :type git :files ("lisp/*.el" "doc/ess.texi" ("etc" "etc/*") ("obsolete" "lisp/obsolete/*") (:exclude "etc/other") "ess-pkg.el") :host github :repo "emacs-ess/ESS")
+  :init
+  (add-hook 'ess-mode-hook #'electric-pair-mode)
+  :config
+  (setq inferior-R-args "--no-restore-history --no-save ")
+  (setq ess-eval-visibly-p nil) ; otherwise C-c C-r (eval region) takes forever
+  (setq ess-ask-for-ess-directory nil) ; otherwise prompted each time you start R
+  (setq ess-r-package-auto-set-evaluation-env nil)
+  (add-to-list 'write-file-functions 'delete-trailing-whitespace))
 
 
-;; (add-hook 'julia-mode-hook
-;; 	  '(lambda ()
-;; 	     (outline-minor-mode)
-;;              (hs-minor-mode)
-;; 	     (make-local-variable 'outline-regexp)
-;; 	     (setq outline-regexp "[#\f]+")
-;;              (electric-pair-mode t)
-;;              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
+(use-package org :straight (:type built-in))
 
-(require 'org)
+(use-package nodejs-repl
+  :straight t
+  :init
+  (add-hook 'js-mode-hook
+            (lambda ()
+              (define-key js-mode-map (kbd "C-c C-n") 'nodejs-repl-send-line)
+              (define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
+              (define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
+              (define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl))))
 
-; sort words
-;; (defun sort-words (reverse beg end)
-;;   "Sort words in region alphabetically, in REVERSE if negative.
-;;     Prefixed with negative \\[universal-argument], sorts in reverse.
-
-;;     The variable `sort-fold-case' determines whether alphabetic case
-;;     affects the sort order.
-
-;;     See `sort-regexp-fields'."
-;;   (interactive "*P\nr")
-;;   (sort-regexp-fields reverse "\\w+" "\\&" beg end))
-
-; node.js jade
-;; requires M-x package-install RET js2-mode RET
-;; (require 'sws-mode)
-;; (require 'jade-mode)
-;; (add-to-list 'auto-mode-alist '("\\.styl$" . sws-mode))
-;; (add-to-list 'auto-mode-alist '("\\.jade$" . jade-mode))
-;; (add-hook 'jade-mode-hook
-;;           '(lambda ()
-;;              (electric-pair-mode t)))
-;; (add-hook 'sws-mode-hook
-;;           '(lambda ()
-;;              (electric-pair-mode t)))
-
-;; (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-;; (add-to-list 'interpreter-mode-alist '("node" . js2-mode))
-;; (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . js2-jsx-mode))
-;; (add-to-list 'interpreter-mode-alist '("node" . js2-jsx-mode))
-;; (setq js2-indent-switch-body t)
-
-;; (require 'nodejs-repl)
-;; (add-hook 'js-mode-hook
-;;           (lambda ()
-;;             (define-key js-mode-map (kbd "C-c C-n") 'nodejs-repl-send-last-sexp)
-;;             (define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
-;;             (define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
-;;             (define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl)))
-
-;json
-
-(add-hook 'json-mode-hook
-          (lambda ()
-            (make-local-variable 'js-indent-level)
-            (setq js-indent-level 2)))
-; yaml
-(require 'yaml-mode)
-(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
-(add-hook 'yaml-mode-hook
-          '(lambda ()
-             (electric-pair-mode t)
-             (define-key yaml-mode-map "\C-m" 'newline-and-indent)
-             (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
+(use-package json-mode
+  :straight t
+  :init
+  (add-hook 'json-mode-hook
+            (lambda ()
+              (make-local-variable 'js-indent-level)
+              (setq js-indent-level 2))))
 
 
+(use-package yaml-mode
+  :straight t
+  :init
+  (add-hook 'yaml-mode-hook
+            '(lambda ()
+               (electric-pair-mode t)
+               (define-key yaml-mode-map "\C-m" 'newline-and-indent)
+               (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
+  :config
+  (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode)))
 
 
-;;; polymode
+(use-package poly-R
+  :straight t)
 
-(require 'poly-R)
-(require 'poly-markdown)
-(add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
-(add-to-list 'auto-mode-alist '("\\.Rnw" . poly-noweb+r-mode))
-(add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
+(use-package quarto-mode
+  :straight t)
 
-(add-to-list 'auto-mode-alist '("\\.[jJ]md" . poly-markdown-mode))
-(add-to-list 'polymode-mode-name-override-alist '(julia . ess-julia))
+(use-package poly-markdown
+  :straight t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
+  (add-to-list 'auto-mode-alist '("\\.Rnw" . poly-noweb+r-mode))
+  (add-to-list 'auto-mode-alist '("\\.Rmd" . poly-markdown+r-mode))
+  (add-to-list 'auto-mode-alist '("\\.[jJ]md" . poly-markdown-mode))
+  (add-to-list 'polymode-mode-name-override-alist '(julia . ess-julia))
+  (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode)))
 
-;; (folding-add-to-marks-list 'markdown-mode "#{{{" "#}}}" nil t)
-
-
-
-
-;;; javascript
-(add-hook 'js-mode-hook
-          '(lambda ()
-             (electric-pair-mode t)))
+;; (require 'js-mode)
+;; (add-hook 'js-mode-hook #'electric-pair-mode)
 ;; (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
 
 ;; (require 'typescript-mode)
@@ -443,22 +315,27 @@
   (setq-local electric-pair-pairs (append electric-pair-pairs web-electric-pairs-single-quote))
   (setq-local electric-pair-pairs (append electric-pair-pairs web-electric-pairs-angle-bracket)))
 
-;; web-mode
-(require 'web-mode)
 
-(setq web-mode-enable-auto-closing t)
-(add-hook 'web-mode-hook
-          (lambda ()
-            ;; short circuit js mode and just do everything in jsx-mode
-            (electric-pair-mode t)
-            (web-add-electric-pairs)
-            (if (equal web-mode-content-type "javascript")
-                (web-mode-set-content-type "jsx")
-              (message "now set to: %s" web-mode-content-type))))
-(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.svelte?\\'" . web-mode))
+(use-package web-mode
+  :straight t
+  :init
+  (add-hook 'web-mode-hook
+            (lambda ()
+              ;; short circuit js mode and just do everything in jsx-mode
+              (electric-pair-mode t)
+              (web-add-electric-pairs)
+              (if (equal web-mode-content-type "javascript")
+                  (web-mode-set-content-type "jsx")
+                (message "now set to: %s" web-mode-content-type))))
+  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.svelte?\\'" . web-mode))
+  :config
+  (setq web-mode-enable-auto-closing t))
+
+
+
 
 ; compile
 (global-set-key [f9] 'compile)
@@ -483,13 +360,23 @@ directory."
 
 (setq compilation-finish-functions 'compile-autoclose)
 
+(use-package yasnippet
+  :straight t
+  :config
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (yas-global-mode 1)
+  (yas-reload-all))
 
-;;; ya snippet
-(require 'yasnippet)
-(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-(yas-global-mode 1)
-(yas-reload-all)
 
+;; c
+(add-hook 'c-mode-hook (lambda () (setq comment-start "//"
+                                        comment-end   "")))
 
-;; browse kill ring
-(require 'browse-kill-ring)
+(use-package stan-mode
+  :straight t
+  :mode ("\\.stan\\'" . stan-mode)
+  :hook (stan-mode . stan-mode-setup)
+  ;;
+  :config
+  ;; The officially recommended offset is 2.
+  (setq stan-indentation-offset 2))
