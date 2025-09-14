@@ -26,4 +26,21 @@ eval "$(zoxide init zsh)"
 path=('/Users/edward/.juliaup/bin' $path)
 export PATH
 
+export FZF_DEFAULT_COMMAND='fd --type d --strip-cwd-prefix --follow --exclude .git .'
+
+# CTRL-Y to copy the command into clipboard using pbcopy
+export FZF_CTRL_R_OPTS="
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+  --color header:italic
+  --header 'Press CTRL-Y to copy command into clipboard'"
+
+_fzf_compgen_dir() {
+  fd --type d --follow --exclude ".git" . "$1"
+}
+
+_fzf_compgen_path() {
+  fd --follow --exclude ".git" --exclude "node_modules". "$1"
+}
+
+
 # <<< juliaup initialize <<<
