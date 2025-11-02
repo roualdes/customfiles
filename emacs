@@ -21,6 +21,41 @@
 
 (straight-use-package 'use-package)
 
+(use-package vertico
+  :straight t
+  :ensure t
+  :config
+  (setq vertico-cycle t)
+  (setq vertico-resize nil)
+  (vertico-mode 1))
+
+(use-package marginalia
+  :straight t
+  :ensure t
+  :config
+  (marginalia-mode 1))
+
+(use-package orderless
+  :straight t
+  :ensure t
+  :config
+  (setq completion-styles '(orderless basic)))
+
+(use-package consult
+  :straight t
+  :ensure t
+  :bind (;; A recursive grep
+         ("M-s M-g" . consult-grep)
+         ;; Search for files names recursively
+         ("M-s M-f" . consult-find)
+         ;; Search through the outline (headings) of the file
+         ("M-s M-o" . consult-outline)
+         ;; Search the current buffer
+         ("M-s M-l" . consult-line)
+         ;; Switch to another buffer, or bookmarked file, or recently
+         ;; opened file.
+         ("M-s M-b" . consult-buffer)))
+
 (use-package window-numbering
   :demand t
   :straight (window-numbering :type git :host github :repo "nschum/window-numbering.el")
@@ -53,45 +88,6 @@
 
 (python-x-setup)
 (autoload 'python-x "python-x" "Python-x-mode" t)
-
-(use-package counsel
-  :straight t
-  :bind (
-         ("C-x C-b" . ivy-switch-buffer)
-         ("C-x b" . ivy-switch-buffer)
-         ("M-r" . counsel-ag)
-         ("C-x C-d" . counsel-dired)
-         ("C-x d" . counsel-dired)
-         ("C-s" . swiper-isearch)
-         )
-  :diminish
-  :config
-  (global-set-key [remap org-set-tags-command] #'counsel-org-tag))
-
-
-(use-package ivy
-  :straight t
-  :demand t
-  :diminish ivy-mode
-  :config
-  (ivy-mode 1)
-  (counsel-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-use-selectable-prompt t)
-  (setq ivy-re-builders-alist '(
-                                (t . ivy--regex-ignore-order)
-                                ))
-  (setq ivy-height 10)
-  (setq counsel-find-file-at-point t)
-  (setq ivy-count-format "(%d/%d) "))
-
-
-(use-package swiper
-  :straight t
-  :bind(("M-C-s" . swiper)))
-
-(use-package ivy-hydra
-  :straight t)
 
 (use-package virtualenvwrapper
   :straight t
@@ -214,10 +210,6 @@
 ; color-theme
 (load-theme 'wombat t)
 
-; ess
-;(add-to-list 'load-path "/Users/ez/.emacs.d/ESS/lisp/")
-
-
 (use-package julia-mode
   :straight t
   :config
@@ -333,8 +325,6 @@
   (add-to-list 'auto-mode-alist '("\\.svelte?\\'" . web-mode))
   :config
   (setq web-mode-enable-auto-closing t))
-
-
 
 
 ; compile
