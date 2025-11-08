@@ -124,6 +124,10 @@
 	     (make-local-variable 'outline-regexp)
 	     (setq outline-regexp "[;\f]+")))
 
+(setq delete-by-moving-to-trash t)
+(defun system-move-file-to-trash (filename)
+  (shell-command (concat (executable-find "rip") " " filename)))
+
 ;; https://www.emacswiki.org/emacs/UnfillParagraph
 ;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
 (defun unfill-paragraph (&optional region)
