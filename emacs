@@ -114,7 +114,8 @@
 ;; (set-frame-font "Inconsolata 16" nil t)
 ;; (set-frame-font "Monaco 15" nil t)
 ;; (set-frame-font "SF Mono 15" nil t)
-(set-frame-font "Fira Mono 15" nil t)
+;; (set-frame-font "Fira Mono 15" nil t)
+(set-face-attribute 'default nil :family "Iosevka Fixed" :height 150 :width 'expanded)
 
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
 (add-hook 'emacs-lisp-mode-hook
