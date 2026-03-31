@@ -1,0 +1,83 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+BUCKET_ROOT="s3://roualdes"
+
+if [[ $# -ne 2 ]]; then
+  usage >&2
+  exit 1
+fi
+
+notebook="$1"
+relpath="$2"
+
+if [[ ! -f "$notebook" ]]; then
+  echo "Error: file not found: $notebook" >&2
+  exit 1
+fi
+
+if [[ "${notebook:e}" != "ipynb" ]]; then
+  echo "Error: expected an .ipynb file: $notebook" >&2
+  exit 1
+fi
+
+if ! command -v quarto >/dev/null 2>&1; then
+  echo "Error: quarto not found on PATH" >&2
+  exit 1
+fi
+
+if ! command -v s3cmd >/dev/null 2>&1; then
+  echo "Error: s3cmd not found on PATH" >&2
+  exit 1
+fi
+
+# Prevent accidental absolute-style paths in the relative argument.
+if [[ "$relpath" == /* ]]; then
+  echo "Error: second argument must be a relative path, not: $relpath" >&2
+  exit 1
+fi
+
+notebook_abs="$(cd "$(dirname "$notebook")" && pwd)/$(basename "$notebook")"
+notebook_dir="$(dirname "$notebook_abs")"
+notebook_base="$(basename "$notebook_abs" .ipynb)"
+html_file="${notebook_dir}/${notebook_base}.html"
+rendered_name="${notebook_base}.html"
+
+quarto render "$notebook_abs" \
+       --quiet \
+       --to html \
+       --embed-resources \
+       --self-contained
+
+  # -M format.html.embed-resources:true \
+  # -M format.html.self-contained-math:true
+
+if [[ ! -f "$html_file" ]]; then
+  echo "Error: expected rendered HTML not found: $html_file" >&2
+  exit 1
+fi
+
+# Build the final S3 target:
+# - trailing slash => treat as prefix and append rendered filename
+# - otherwise, if basename contains a dot/extension => treat as full object path
+# - otherwise => reject to avoid ambiguity
+if [[ "$relpath" == */ ]]; then
+  s3target="${BUCKET_ROOT}/${relpath}${rendered_name}"
+else
+  base_part="$(basename "$relpath")"
+  if [[ "$base_part" == *.* ]]; then
+    s3target="${BUCKET_ROOT}/${relpath}"
+  else
+    echo "Error: second argument must either end with '/' or include a file extension: $relpath" >&2
+    exit 1
+  fi
+fi
+
+s3cmd put \
+      --quiet \
+      --mime-type=text/html \
+      --acl-public \
+      "$html_file" \
+      "$s3target"
+
+echo "posted: ${notebook} -> roualdes.sfo3.digitaloceanspaces.com/${relpath}${rendered_name}"
