@@ -1,7 +1,36 @@
 #!/usr/bin/env zsh
 set -euo pipefail
 
-BUCKET_ROOT="s3://roualdes"
+# TODO
+# add support for .R/.csv files
+
+show_help() {
+  cat <<'EOF'
+Usage: pub src dst
+
+src     path to an ipynb file
+dst     destination path relative to S3 bucket
+
+If dst ends in a slash, the src file basename will be placed in the
+folder of dst.
+
+If dst does not end in a slash, the src file will be renamed to the
+basename of dst and placed in the folder of dst. There should be no
+extensionon dst.
+
+Options:
+  -h, --help    Show this help message and exit
+EOF
+}
+
+for arg in "$@"; do
+  case $arg in
+    -h|--help)
+      show_help
+      exit 0
+      ;;
+  esac
+done
 
 if [[ $# -ne 2 ]]; then
   echo "pub needs to argument src and dest"
@@ -16,46 +45,70 @@ if [[ "$relpath" == /* ]]; then
   exit 1
 fi
 
-
-notebook_abs="$notebook:a"
-notebook_dir="$notebook:a:h"
-notebook_base="$notebook:t:r"
-
-html_file="${notebook_dir}/${notebook_base}.html"
-rendered_name="${notebook_base}.html"
-
-quarto render "$notebook_abs" \
-       --quiet \
-       --to html \
-       --embed-resources \
-       --self-contained
-
-# Build the final S3 target:
-# - trailing slash => treat as prefix and append rendered filename
-# - otherwise, if basename contains a dot/extension => treat as full object path
-# - otherwise => reject to avoid ambiguity
-if [[ "$relpath" == */ ]]; then
-  s3target="${BUCKET_ROOT}/${relpath}${rendered_name}"
-else
-  base_part="$(basename "$relpath")"
-  if [[ "$base_part" == *.* ]]; then
-    s3target="${BUCKET_ROOT}/${relpath}"
-  else
-    echo "Error: second argument must either end with '/' or include a file extension: $relpath" >&2
+if [[ -n ${relpath:t:e} ]]; then
+    echo "Error: even if you are trying to name the destination file, do not use an extension."
     exit 1
-  fi
 fi
 
-s3cmd put \
-      --quiet \
-      --mime-type=text/html \
-      --acl-public \
-      "$html_file" \
-      "$s3target"
+BUCKET_ROOT="s3://roualdes"
+
+src="$notebook:a"
+src_dir="$src:a:h"
+src_base="$src:t:r"
+
+if [[ "$relpath" == */ ]]; then
+    dest_html="${src_base}.html"
+    dest_ipynb="${src_base}.out.ipynb"
+    s3dest_html="${BUCKET_ROOT}/${relpath}${src_base}.html"
+    s3dest_ipynb="${BUCKET_ROOT}/${relpath}${src_base}.out.ipynb"
+else
+    path="${relpath:h}"
+    name="${relpath:t:r}"
+    dest_html="${name}.html"
+    dest_ipynb="${name}.ipynb"
+    s3dest_html="${BUCKET_ROOT}/${path}/${name}.html"
+    s3dest_ipynb="${BUCKET_ROOT}/${path}/${name}.out.ipynb"
+fi
+
+cell_id="$(uuidgen | tr '[:upper:]' '[:lower:]')"
+
+jq \
+  --arg html "$dest_html" \
+  --arg ipynb "$dest_ipynb" \
+  --arg id "$cell_id" \
+  '.cells = [{
+    "cell_type": "raw",
+    "id": $id,
+    "metadata": {},
+    "source": [
+      "---\n",
+      "format:\n",
+      "  html:\n",
+      "    output-file: \($html)\n",
+      "    embed-resources: true\n",
+      "    standalone: true\n",
+      "  ipynb:\n",
+      "    output-file: \($ipynb)\n",
+      "format-links: [ipynb]\n",
+      "---"
+    ]
+  }] + .cells' \
+      "$notebook" > tmp.ipynb
+
+quarto render tmp.ipynb --quiet
+
+s3cmd put -q -P -m text/html "$dest_html" "$s3dest_html"
+s3cmd put -q -P -m text/plain "$dest_ipynb" "$s3dest_ipynb"
+
+URL="https://roualdes.sfo3.digitaloceanspaces.com/"
 
 echo "posted: ${notebook} ->"
 if [[ "$relpath" == */ ]]; then
-   echo "https://roualdes.sfo3.digitaloceanspaces.com/${relpath}${rendered_name}"
+    echo "${URL}${relpath}${dest_html}"
+    echo "${URL}${relpath}${dest_ipynb}"
 else
-    echo "https://roualdes.sfo3.digitaloceanspaces.com/${relpath}"
+    echo "${URL}${relpath}.html"
+    echo "${URL}${relpath}.out.ipynb"
 fi
+
+rm -rf tmp.ipynb tmp_files "$dest_html" "$dest_ipynb"
