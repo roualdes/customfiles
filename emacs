@@ -1,32 +1,9 @@
-;;; use package
-(require 'package)
-(eval-when-compile (require 'use-package))
-
-(setq package-archives
-      '(("gnu"    . "https://elpa.gnu.org/packages/")
-        ("nongnu" . "https://elpa.nongnu.org/nongnu/")
-        ("melpa"  . "https://melpa.org/packages/")))
-
-(package-initialize)
-
-(unless package-archive-contents
-  (package-refresh-contents))
-
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
-
-(require 'use-package)
-(setq use-package-always-ensure t)
-
-;; (let ((default-directory "/Users/edward/.emacs.d/"))
-;;   (normal-top-level-add-subdirs-to-load-path))
-
+;; Bootstrap straight.el
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
         "straight/repos/straight.el/bootstrap.el"
-        (or (bound-and-true-p straight-base-dir)
-            user-emacs-directory)))
+        user-emacs-directory))
       (bootstrap-version 7))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
@@ -37,7 +14,12 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+;; Install and configure use-package through straight.el
 (straight-use-package 'use-package)
+
+(setq straight-use-package-by-default t)
+
+(require 'use-package)
 
 (use-package vertico
   :straight t
@@ -178,6 +160,7 @@
 ;; (set-frame-font "SF Mono 15" nil t)
 ;; (set-frame-font "Fira Mono 15" nil t)
 (set-frame-font "IBM Plex Mono 15" nil t)
+(load-theme 'wombat t)
 
 ;; Enable mouse support
 (unless window-system
@@ -233,6 +216,7 @@
 
 ;; uniquify
 (use-package uniquify
+  :straight nil
   :ensure nil
   :init
   (setq uniquify-buffer-name-style
@@ -302,9 +286,6 @@
              (electric-pair-mode t)
              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 ;; (require 'cmake-mode)
-
-; color-theme
-(load-theme 'wombat t)
 
 (use-package julia-mode
   :straight t
