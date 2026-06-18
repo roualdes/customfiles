@@ -1,4 +1,22 @@
+;;; use package
+(require 'package)
 (eval-when-compile (require 'use-package))
+
+(setq package-archives
+      '(("gnu"    . "https://elpa.gnu.org/packages/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+        ("melpa"  . "https://melpa.org/packages/")))
+
+(package-initialize)
+
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 ;; (let ((default-directory "/Users/edward/.emacs.d/"))
 ;;   (normal-top-level-add-subdirs-to-load-path))
@@ -78,6 +96,59 @@
 (use-package cython-mode
   :straight t)
 
+(use-package virtualenvwrapper
+  :straight t
+  :config
+  (venv-initialize-interactive-shells)
+  (setq venv-location '("/Users/edward/venvs/py3/"
+                        "/Users/edward/venvs/py2/")))
+
+;; lsp-mode core
+;; (use-package lsp-mode
+;;   :commands (lsp lsp-deferred)
+;;   :init
+;;   (setq lsp-keymap-prefix "C-c l"))
+
+;; ;; Function that starts Python LSP
+;; (defun my/python-lsp-start ()
+;;   "Start Pyright LSP for Python buffers."
+;;   (require 'lsp-mode)
+;;   (require 'lsp-pyright)
+;;   (lsp-deferred))
+
+;; ;; Pyright package
+;; (use-package lsp-pyright
+;;   :defer t
+;;   :custom
+;;   (lsp-pyright-langserver-command "pyright")
+;;   (lsp-pyright-type-checking-mode "basic")
+;;   :init
+;;   (add-hook 'python-mode-hook #'my/python-lsp-start)
+;;   (add-hook 'python-ts-mode-hook #'my/python-lsp-start))
+
+;; ;; Optional UI layer; this should not be what starts LSP
+;; (use-package lsp-ui
+;;   :commands lsp-ui-mode
+;;   :hook
+;;   (lsp-mode . lsp-ui-mode))
+
+;; Completion UI
+(use-package company
+  :hook (after-init . global-company-mode)
+  :custom
+  (company-idle-delay 0.2)
+  (company-minimum-prefix-length 3))
+
+;; ;; Optional but nice: inline docs, sideline diagnostics, code actions UI
+;; (use-package lsp-ui
+;;   :commands lsp-ui-mode
+;;   :hook (lsp-mode . lsp-ui-mode))
+
+;; ;; Optional: better error list
+;; (use-package flycheck
+;;   :init (global-flycheck-mode))
+
+
 (use-package python
   :straight t
   :init
@@ -88,15 +159,6 @@
 
 (python-x-setup)
 (autoload 'python-x "python-x" "Python-x-mode" t)
-
-(use-package virtualenvwrapper
-  :straight t
-  :config
-  (venv-initialize-interactive-shells)
-  (setq venv-location '("/Users/edward/venvs/py3/"
-                        "/Users/edward/venvs/py2/")))
-
-
 
 ; emacs
 (setq inhibit-startup-message   t)   ; Don't want any startup message
@@ -115,7 +177,34 @@
 ;; (set-frame-font "Monaco 15" nil t)
 ;; (set-frame-font "SF Mono 15" nil t)
 ;; (set-frame-font "Fira Mono 15" nil t)
-(set-face-attribute 'default nil :family "Iosevka Fixed" :height 150 :width 'expanded)
+(set-frame-font "IBM Plex Mono 15" nil t)
+
+;; Enable mouse support
+(unless window-system
+  (require 'mouse)
+  (xterm-mouse-mode t)
+  (global-set-key [mouse-4] (lambda ()
+                              (interactive)
+                              (scroll-down 1)))
+  (global-set-key [mouse-5] (lambda ()
+                              (interactive)
+                              (scroll-up 1)))
+  (defun track-mouse (e))
+  (setq mouse-sel-mode t)
+  )
+
+;; Enable clipboard support
+(defun copy-from-osx ()
+(shell-command-to-string "pbpaste"))
+
+(defun paste-to-osx (text &optional push)
+(let ((process-connection-type nil))
+(let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+(process-send-string proc text)
+(process-send-eof proc))))
+
+(setq interprogram-cut-function 'paste-to-osx)
+(setq interprogram-paste-function 'copy-from-osx)
 
 (global-set-key (kbd "C-c q") 'auto-fill-mode)
 (add-hook 'emacs-lisp-mode-hook
@@ -144,6 +233,7 @@
 
 ;; uniquify
 (use-package uniquify
+  :ensure nil
   :init
   (setq uniquify-buffer-name-style
         'post-forward uniquify-separator ":"))
@@ -204,6 +294,7 @@
           '(lambda ()
              (hs-minor-mode)
              (electric-pair-mode t)
+             (c-set-offset 'innamespace 0)
              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 (add-hook 'c-mode-hook
           '(lambda ()
@@ -234,11 +325,20 @@
              (electric-pair-mode t)
              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 
+(defun my/r-lsp-start ()
+  "Start R LSP for ESS R buffers."
+  (require 'lsp-mode)
+  (lsp-deferred))
 
 (use-package ess
-  :straight (ess :type git :files ("lisp/*.el" "doc/ess.texi" ("etc" "etc/*") ("obsolete" "lisp/obsolete/*") (:exclude "etc/other") "ess-pkg.el") :host github :repo "emacs-ess/ESS")
+  :straight (ess
+             :type git
+             :files ("lisp/*.el" "doc/ess.texi" ("etc" "etc/*") ("obsolete" "lisp/obsolete/*") (:exclude "etc/other") "ess-pkg.el")
+             :host github
+             :repo "emacs-ess/ESS")
   :init
   (add-hook 'ess-mode-hook #'electric-pair-mode)
+  (add-hook 'ess-r-mode-hook #'my/r-lsp-start)
   :config
   (setq inferior-R-args "--no-restore-history --no-save ")
   (setq ess-eval-visibly-p nil) ; otherwise C-c C-r (eval region) takes forever
