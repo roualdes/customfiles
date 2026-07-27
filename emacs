@@ -346,6 +346,7 @@
   (add-hook 'json-mode-hook
             (lambda ()
               (make-local-variable 'js-indent-level)
+              (hs-minor-mode)
               (setq js-indent-level 2))))
 
 
