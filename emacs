@@ -457,3 +457,16 @@ directory."
   :config
   ;; The officially recommended offset is 2.
   (setq stan-indentation-offset 2))
+
+;; typst
+(use-package typst-ts-mode
+ :straight '(:type git
+             :host codeberg
+             :repo "meow_king/typst-ts-mode"
+             :branch "main")
+ :mode ("\\.typ\\'" . typst-ts-mode)
+ :demand t
+ :config
+;;  Download and compile the matching Tree-sitter grammar once.
+ (unless (treesit-language-available-p 'typst)
+   (typst-ts-mc-install-grammar)))

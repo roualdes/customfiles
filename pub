@@ -50,7 +50,8 @@ if [[ -n ${relpath:t:e} ]]; then
     exit 1
 fi
 
-BUCKET_ROOT="s3://roualdes"
+# BUCKET_ROOT="s3://roualdes"
+BUCKET_ROOT="do:roualdes"
 
 src="$notebook:a"
 src_dir="$src:a:h"
@@ -58,19 +59,22 @@ src_base="$src:t:r"
 
 if [[ "$relpath" == */ ]]; then
     dest_html="${src_base}.html"
-    dest_ipynb="${src_base}.out.ipynb"
+    dest_ipynb="${src_base}.ipynb"
     s3dest_html="${BUCKET_ROOT}/${relpath}${src_base}.html"
-    s3dest_ipynb="${BUCKET_ROOT}/${relpath}${src_base}.out.ipynb"
+    s3dest_ipynb="${BUCKET_ROOT}/${relpath}${src_base}.ipynb"
 else
-    path="${relpath:h}"
+    rpath="${relpath:h}"
     name="${relpath:t:r}"
     dest_html="${name}.html"
     dest_ipynb="${name}.ipynb"
-    s3dest_html="${BUCKET_ROOT}/${path}/${name}.html"
-    s3dest_ipynb="${BUCKET_ROOT}/${path}/${name}.out.ipynb"
+    s3dest_html="${BUCKET_ROOT}/${rpath}/${name}.html"
+    s3dest_ipynb="${BUCKET_ROOT}/${rpath}/${name}.ipynb"
 fi
 
 cell_id="$(uuidgen | tr '[:upper:]' '[:lower:]')"
+
+work_dir="$(mktemp -d)"
+trap 'rm -rf -- "$work_dir"' EXIT
 
 jq \
   --arg html "$dest_html" \
@@ -93,12 +97,23 @@ jq \
       "---"
     ]
   }] + .cells' \
-      "$notebook" > tmp.ipynb
+      "$notebook" > "$work_dir/tmp.ipynb"
 
-quarto render tmp.ipynb --quiet
+(
+    cd "$work_dir"
+    quarto render tmp.ipynb --quiet
+)
 
-s3cmd put -q -P -m text/html "$dest_html" "$s3dest_html"
-s3cmd put -q -P -m text/plain "$dest_ipynb" "$s3dest_ipynb"
+# s3cmd put -q -P -m text/html "$dest_html" "$s3dest_html"
+rclone copyto "$work_dir/$dest_html" "$s3dest_html" \
+       -q \
+       --s3-acl public-read \
+       --metadata-set content-type=text/html
+# s3cmd put -q -P -m text/plain "$dest_ipynb" "$s3dest_ipynb"
+rclone copyto "$work_dir/$dest_ipynb" "$s3dest_ipynb" \
+       -q \
+       --s3-acl public-read \
+       --metadata-set content-type=application/x-ipynb+json
 
 URL="https://roualdes.sfo3.digitaloceanspaces.com/"
 
@@ -108,7 +123,7 @@ if [[ "$relpath" == */ ]]; then
     echo "${URL}${relpath}${dest_ipynb}"
 else
     echo "${URL}${relpath}.html"
-    echo "${URL}${relpath}.out.ipynb"
+    echo "${URL}${relpath}.ipynb"
 fi
 
 rm -rf tmp.ipynb tmp_files "$dest_html" "$dest_ipynb"
