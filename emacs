@@ -56,10 +56,19 @@
          ;; opened file.
          ("M-s M-b" . consult-buffer)))
 
-(use-package window-numbering
-  :demand t
-  :straight (window-numbering :type git :host github :repo "nschum/window-numbering.el")
-  :config (window-numbering-mode t))
+;; ace-window
+;; M-o ? for help on available commands
+;; https://github.com/abo-abo/ace-window
+(use-package ace-window
+  :straight t
+  :bind (("M-o" . ace-window))
+  :init
+  (setq aw-scope 'frame
+        aw-dispatch-always t
+        aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
+  :config
+  (ace-window-display-mode 1))
+
 
 (use-package line-comment-banner
   :straight (line-comment-banner :type git :host github :repo "emacsattic/line-comment-banner")
