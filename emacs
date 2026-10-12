@@ -1,4 +1,4 @@
-;; Bootstrap straight.el
+;; Bootstrap straight.el  -*- lexical-binding: t; -*-
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -443,8 +443,27 @@ directory."
                          (get-buffer-window buffer t)))
         (t
          (message "Compilation exited abnormally: %s" string))))
-
 (setq compilation-finish-functions 'compile-autoclose)
+
+;;; quarto
+(defun quarto-autoclose (&rest _args)
+  "Close the shell output window after a successful Quarto render."
+  (let ((buffer (get-buffer "*Shell Command Output*")))
+    (when buffer
+      (with-current-buffer buffer
+        (save-excursion
+          (goto-char (point-min))
+          (when (re-search-forward "^[[:space:]]*Output created: .*" nil t)
+            (message "Nothing is fucked here, Dude.")
+            (let ((window (get-buffer-window buffer t)))
+              (when window
+                (run-with-timer 1 nil
+                                (lambda (window)
+                                  (when (window-live-p window)
+                                    (delete-window window)))
+                                window)))))))))
+
+(advice-add 'shell-command :after #'quarto-autoclose)
 
 (use-package yasnippet
   :straight t
@@ -479,3 +498,9 @@ directory."
 ;;  Download and compile the matching Tree-sitter grammar once.
  (unless (treesit-language-available-p 'typst)
    (typst-ts-mc-install-grammar)))
+
+;; jsonnet
+(use-package jsonnet-mode
+  :straight t
+  :mode (("\\.jsonnet\\'" . jsonnet-mode)
+         ("\\.libsonnet\\'" . jsonnet-mode)))

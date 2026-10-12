@@ -125,5 +125,3 @@ else
     echo "${URL}${relpath}.html"
     echo "${URL}${relpath}.ipynb"
 fi
-
-rm -rf tmp.ipynb tmp_files "$dest_html" "$dest_ipynb"
