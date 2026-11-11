@@ -140,16 +140,7 @@
 ;;   :init (global-flycheck-mode))
 
 
-(use-package python
-  :straight t
-  :init
-  (add-hook 'python-mode-hook #'electric-pair-mode))
 
-(use-package python-x
-  :straight t)
-
-(python-x-setup)
-(autoload 'python-x "python-x" "Python-x-mode" t)
 
 ; emacs
 (setq inhibit-startup-message   t)   ; Don't want any startup message
@@ -282,19 +273,8 @@
 ;; (setq-default TeX-master nil)
 (setq LaTeX-math-mode t)
 
-; c++
-(add-hook 'c++-mode-hook
-          '(lambda ()
-             (hs-minor-mode)
-             (electric-pair-mode t)
-             (c-set-offset 'innamespace 0)
-             (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
-(add-hook 'c-mode-hook
-          '(lambda ()
-             (hs-minor-mode)
-             (electric-pair-mode t)
-             (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
-;; (require 'cmake-mode)
+
+
 
 (use-package julia-mode
   :straight t
@@ -504,3 +484,84 @@ directory."
   :straight t
   :mode (("\\.jsonnet\\'" . jsonnet-mode)
          ("\\.libsonnet\\'" . jsonnet-mode)))
+
+;; treesitter
+;; Tree-sitter grammars
+(with-eval-after-load 'treesit
+  (setq treesit-language-source-alist
+        '((c      "https://github.com/tree-sitter/tree-sitter-c")
+          (cpp    "https://github.com/tree-sitter/tree-sitter-cpp")
+          (python "https://github.com/tree-sitter/tree-sitter-python")
+          (cmake  "https://github.com/uyha/tree-sitter-cmake"))))
+;;; then run
+;;; M-x treesit-install-language-grammar RET c RET
+;;; for each
+
+;; Prefer tree-sitter modes
+(setq major-mode-remap-alist
+      '((c-mode      . c-ts-mode)
+        (c++-mode    . c++-ts-mode)
+        (python-mode . python-ts-mode)))
+
+(add-to-list 'auto-mode-alist
+             '("CMakeLists\\.txt\\'" . cmake-ts-mode))
+(add-to-list 'auto-mode-alist
+             '("\\.cmake\\'" . cmake-ts-mode))
+
+;; clang format
+(use-package clang-format
+  :straight t
+  :hook
+  (c++-ts-mode . (lambda ()
+                   (add-hook 'before-save-hook
+                             #'clang-format-buffer
+                             nil t))))
+
+
+;; c++
+;; TODO
+;; (add-hook 'c++-mode-hook
+;;           '(lambda ()
+;;              (hs-minor-mode)
+;;              (electric-pair-mode t)
+;;              (c-set-offset 'innamespace 0)
+;;              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
+;; (add-hook 'c-mode-hook
+;;           '(lambda ()
+;;              (hs-minor-mode)
+;;              (electric-pair-mode t)
+;;              (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
+;; (require 'cmake-mode)
+;; maybe replace by treesitter mode settings
+(add-hook 'c++-ts-mode-hook
+          (lambda ()
+            (hs-minor-mode)
+            (electric-pair-mode t)
+            (add-to-list 'write-file-functions
+                         'delete-trailing-whitespace)))
+
+;; (add-hook 'c-ts-mode-hook
+;;           (lambda ()
+;;             (hs-minor-mode)
+;;             (electric-pair-mode t)
+;;             (add-to-list 'write-file-functions
+;;                          'delete-trailing-whitespace)))
+
+;; python
+;; TODO
+;; (use-package python
+;;   :straight t
+;;   :init
+;;   (add-hook 'python-mode-hook #'electric-pair-mode))
+
+;; (use-package python-x
+;;   :straight t)
+
+;; (python-x-setup)
+;; (autoload 'python-x "python-x" "Python-x-mode" t)
+;; maybe replace by treesitter mode settings
+(use-package python
+  :straight nil
+  :ensure nil
+  :mode ("\\.py\\'" . python-ts-mode)
+  :hook (python-ts-mode . electric-pair-mode))
