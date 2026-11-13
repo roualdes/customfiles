@@ -321,13 +321,16 @@
 
 (use-package nodejs-repl
   :straight t
-  :init
-  (add-hook 'js-mode-hook
-            (lambda ()
-              (define-key js-mode-map (kbd "C-c C-n") 'nodejs-repl-send-line)
-              (define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
-              (define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
-              (define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl))))
+  :config
+  (defun my/nodejs-repl-keys ()
+    (local-set-key (kbd "C-c C-n") #'nodejs-repl-send-line)
+    (local-set-key (kbd "C-c C-r") #'nodejs-repl-send-region)
+    (local-set-key (kbd "C-c C-l") #'nodejs-repl-load-file)
+    (local-set-key (kbd "C-c C-z") #'nodejs-repl-switch-to-repl))
+
+  (add-hook 'js-ts-mode-hook #'my/nodejs-repl-keys)
+  (add-hook 'typescript-ts-mode-hook #'my/nodejs-repl-keys)
+  (add-hook 'tsx-ts-mode-hook #'my/nodejs-repl-keys))
 
 (use-package json-mode
   :straight t
@@ -485,28 +488,38 @@ directory."
   :mode (("\\.jsonnet\\'" . jsonnet-mode)
          ("\\.libsonnet\\'" . jsonnet-mode)))
 
-;; treesitter
 ;; Tree-sitter grammars
 (with-eval-after-load 'treesit
   (setq treesit-language-source-alist
-        '((c      "https://github.com/tree-sitter/tree-sitter-c")
-          (cpp    "https://github.com/tree-sitter/tree-sitter-cpp")
-          (python "https://github.com/tree-sitter/tree-sitter-python")
-          (cmake  "https://github.com/uyha/tree-sitter-cmake"))))
+        '((c          "https://github.com/tree-sitter/tree-sitter-c")
+          (cpp        "https://github.com/tree-sitter/tree-sitter-cpp")
+          (python     "https://github.com/tree-sitter/tree-sitter-python")
+          (cmake      "https://github.com/uyha/tree-sitter-cmake")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript"
+                      "master" "typescript/src")
+          (tsx        "https://github.com/tree-sitter/tree-sitter-typescript"
+                      "master" "tsx/src"))))
 ;;; then run
 ;;; M-x treesit-install-language-grammar RET c RET
 ;;; for each
 
 ;; Prefer tree-sitter modes
 (setq major-mode-remap-alist
-      '((c-mode      . c-ts-mode)
-        (c++-mode    . c++-ts-mode)
-        (python-mode . python-ts-mode)))
+      '((c-mode         . c-ts-mode)
+        (c++-mode       . c++-ts-mode)
+        (python-mode    . python-ts-mode)
+        (js-mode        . js-ts-mode)
+        (typescript-mode . typescript-ts-mode)))
 
-(add-to-list 'auto-mode-alist
-             '("CMakeLists\\.txt\\'" . cmake-ts-mode))
-(add-to-list 'auto-mode-alist
-             '("\\.cmake\\'" . cmake-ts-mode))
+(dolist (entry '(("\\.cmake\\'"         . cmake-ts-mode)
+                 ("CMakeLists\\.txt\\'" . cmake-ts-mode)
+                 ("\\.jsx\\'"           . js-ts-mode)
+                 ("\\.ts\\'"            . typescript-ts-mode)
+                 ("\\.mts\\'"           . typescript-ts-mode)
+                 ("\\.cts\\'"           . typescript-ts-mode)
+                 ("\\.tsx\\'"           . tsx-ts-mode)))
+  (add-to-list 'auto-mode-alist entry))
 
 ;; clang format
 (use-package clang-format
@@ -517,6 +530,12 @@ directory."
                              #'clang-format-buffer
                              nil t))))
 
+;; javascript
+(dolist (mode '(js-ts-mode
+                typescript-ts-mode
+                tsx-ts-mode))
+  (add-hook (intern (format "%s-hook" mode))
+            #'electric-pair-local-mode))
 
 ;; c++
 ;; TODO
